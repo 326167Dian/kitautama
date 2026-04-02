@@ -22,19 +22,19 @@ $(document).ready(function() {
 			let q = (data['hrgjual_barang_reguler'] - data['hrgsat_barang']) / data['hrgsat_barang'];
 			
 			if(q <= 0.2){
-				$(row).find('td:eq(3)').css('background-color', '#ff003f');
-				$(row).find('td:eq(3)').css('color', '#ffffff');
+				$(row).find('td:eq(4)').css('background-color', '#ff003f');
+				$(row).find('td:eq(4)').css('color', '#ffffff');
 			} else if(q > 0.2 && q <= 0.25){
-				$(row).find('td:eq(3)').css('background-color', '#f39c12');
-				$(row).find('td:eq(3)').css('color', '#ffffff');
+				$(row).find('td:eq(4)').css('background-color', '#f39c12');
+				$(row).find('td:eq(4)').css('color', '#ffffff');
 				
 			} else if(q > 0.25 && q <= 0.3){
-				$(row).find('td:eq(3)').css('background-color', '#00ff3f');
-				$(row).find('td:eq(3)').css('color', '#ffffff');
+				$(row).find('td:eq(4)').css('background-color', '#00ff3f');
+				$(row).find('td:eq(4)').css('color', '#ffffff');
 				
 			} else if(q > 0.3){
-				$(row).find('td:eq(3)').css('background-color', '#00bfff');
-				$(row).find('td:eq(3)').css('color', '#ffffff');
+				$(row).find('td:eq(4)').css('background-color', '#00bfff');
+				$(row).find('td:eq(4)').css('color', '#ffffff');
 			}
 			
 		},
@@ -44,6 +44,17 @@ $(document).ready(function() {
 		},
 		{
 			"data": "nm_barang"
+		},
+		{
+			"data": "jenisobat",
+			"className": 'text-center',
+			"render": function(data, type, row) {
+				if (type === 'display') {
+					var label = $('<div>').text(data || '-').html();
+					return label + "<div style='margin-top:6px;'><button type='button' class='btn btn-xs btn-info btn-edit-jenisobat' data-id='" + (row.id_barang || '') + "'>Edit</button></div>";
+				}
+				return data;
+			}
 		},
 		{
 			"data": "stok_barang",
@@ -138,6 +149,8 @@ $(document).ready(function() {
 		window.open('modul/mod_barang/print_barcode.php?id=' + idBarang + '&qty=' + qty, '_blank');
 	});
 
+	var jenisobatModalRow = null;
+	var jenisobatModalData = null;
 	var indikasiModalRow = null;
 	var indikasiModalData = null;
 	var zataktifModalRow = null;
@@ -183,6 +196,52 @@ $(document).ready(function() {
 				.attr('aria-hidden', 'true');
 		}
 	}
+	function showJenisobatModal() {
+		if (typeof $.fn.modal === 'function') {
+			$('#jenisobatModal').modal('show');
+		} else {
+			$('body').addClass('modal-open');
+			$('#jenisobatModal')
+				.addClass('is-open in')
+				.attr('aria-hidden', 'false');
+		}
+	}
+	function hideJenisobatModal() {
+		if (typeof $.fn.modal === 'function') {
+			$('#jenisobatModal').modal('hide');
+		} else {
+			$('body').removeClass('modal-open');
+			$('#jenisobatModal')
+				.removeClass('is-open in')
+				.attr('aria-hidden', 'true');
+		}
+	}
+
+	$(document).on('click', '.btn-edit-jenisobat', function(e) {
+		e.preventDefault();
+		var rowEl = $(this).closest('tr');
+		jenisobatModalRow = table.row(rowEl).index();
+		jenisobatModalData = table.row(rowEl).data() || {};
+		var idBarang = jenisobatModalData.id_barang || $(this).data('id');
+		if (!idBarang) {
+			return;
+		}
+
+		jenisobatModalData.id_barang = idBarang;
+		var currentValue = jenisobatModalData.jenisobat_value || '';
+		var select = $('#jenisobat_modal_select');
+		select.find('option[data-temp="1"]').remove();
+		select.val(currentValue);
+		if (currentValue && select.val() !== currentValue) {
+			select.append($('<option>', {
+				value: currentValue,
+				text: currentValue,
+				'data-temp': '1'
+			}));
+			select.val(currentValue);
+		}
+		showJenisobatModal();
+	});
 
 	$(document).on('click', '.btn-edit-indikasi', function(e) {
 		e.preventDefault();
@@ -196,7 +255,7 @@ $(document).ready(function() {
 		indikasiModalData.id_barang = idBarang;
 		var indikasiHtml = indikasiModalData.indikasi || '';
 		if (!indikasiHtml) {
-			var cellHtml = table.cell(rowEl, 5).data() || '';
+			var cellHtml = table.cell(rowEl, 6).data() || '';
 			var temp = $('<div>').html(cellHtml);
 			temp.find('.btn-edit-indikasi').remove();
 			indikasiHtml = temp.html();
@@ -217,6 +276,12 @@ $(document).ready(function() {
 		}
 	});
 
+	$('#jenisobatModal').on('hidden.bs.modal', function() {
+		$('#jenisobat_modal_select').find('option[data-temp="1"]').remove();
+		$('#jenisobat_modal_select').val('');
+		jenisobatModalRow = null;
+		jenisobatModalData = null;
+	});
 	$('#indikasiModal').on('hidden.bs.modal', function() {
 		if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.indikasi_modal_editor) {
 			CKEDITOR.instances.indikasi_modal_editor.destroy(true);
@@ -233,6 +298,10 @@ $(document).ready(function() {
 		zataktifModalRow = null;
 		zataktifModalData = null;
 	});
+	$(document).on('click', '#jenisobatModal .close, #jenisobatModal [data-dismiss="modal"]', function(e) {
+		e.preventDefault();
+		hideJenisobatModal();
+	});
 	$(document).on('click', '#indikasiModal .close, #indikasiModal [data-dismiss="modal"]', function(e) {
 		e.preventDefault();
 		hideIndikasiModal();
@@ -240,6 +309,31 @@ $(document).ready(function() {
 	$(document).on('click', '#zataktifModal .close, #zataktifModal [data-dismiss="modal"]', function(e) {
 		e.preventDefault();
 		hideZataktifModal();
+	});
+
+	$('#jenisobat_modal_save').on('click', function(e) {
+		e.preventDefault();
+		if (!jenisobatModalData || !jenisobatModalData.id_barang) {
+			return;
+		}
+		var newValue = $('#jenisobat_modal_select').val() || '';
+		$.ajax({
+			type: 'POST',
+			url: 'modul/mod_barang/aksi_barang.php?module=barang&act=update_jenisobat',
+			data: {
+				id_barang: jenisobatModalData.id_barang,
+				jenisobat: newValue
+			},
+			success: function() {
+				jenisobatModalData.jenisobat_value = newValue;
+				jenisobatModalData.jenisobat = newValue || '-';
+				table.row(jenisobatModalRow).data(jenisobatModalData).invalidate().draw(false);
+				hideJenisobatModal();
+			},
+			error: function(xhr) {
+				alert(xhr.responseText || 'Gagal menyimpan perubahan.');
+			}
+		});
 	});
 
 	$('#indikasi_modal_save').on('click', function(e) {
@@ -281,7 +375,7 @@ $(document).ready(function() {
 		zataktifModalData.id_barang = idBarang;
 		var zataktifHtml = zataktifModalData.zataktif || '';
 		if (!zataktifHtml) {
-			var cellHtml = table.cell(rowEl, 4).data() || '';
+			var cellHtml = table.cell(rowEl, 5).data() || '';
 			var temp = $('<div>').html(cellHtml);
 			temp.find('.btn-edit-zataktif').remove();
 			zataktifHtml = temp.html();

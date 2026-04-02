@@ -9,11 +9,12 @@ if ($_GET['action'] == "table_data") {
     $columns = array(
         0 => 'id_barang',
         1 => 'nm_barang',
-        2 => 'updated_by',
-        3 => 'hrgjual_barang',
-        4 => 'zataktif',
-        5 => 'indikasi',
-        6 => 'id_barang'
+        2 => 'jenisobat',
+        3 => 'stok_barang',
+        4 => 'hrgjual_barang',
+        5 => 'zataktif',
+        6 => 'indikasi',
+        7 => 'id_barang'
     );
 
     $querycount = $db->query("SELECT count(id_barang) as jumlah FROM barang");
@@ -60,6 +61,7 @@ if ($_GET['action'] == "table_data") {
                                     updated_by 
             FROM barang WHERE kd_barang LIKE '%$search%' 
                         OR nm_barang LIKE '%$search%'
+                        OR jenisobat LIKE '%$search%'
                         OR stok_barang LIKE '%$search%'
                         OR sat_barang LIKE '%$search%'
                         OR updated_by LIKE '%$search%'
@@ -72,6 +74,7 @@ if ($_GET['action'] == "table_data") {
         $querycount = $db->query("SELECT count(id_barang) as jumlah 
             FROM barang WHERE kd_barang LIKE '%$search%' 
                         OR nm_barang LIKE '%$search%'
+                        OR jenisobat LIKE '%$search%'
                         OR stok_barang LIKE '%$search%'
                         OR sat_barang LIKE '%$search%'
                         OR updated_by LIKE '%$search%'
@@ -91,6 +94,8 @@ if ($_GET['action'] == "table_data") {
             $nestedData['no']               = $no;
             $nestedData['id_barang']        = $value['id_barang'];
             $nestedData['nm_barang']        = $value['nm_barang'] . ' <span style="color: #666;">(' . $value['kd_barang'] . ')</span>';
+            $nestedData['jenisobat_value']  = isset($value['jenisobat']) ? trim($value['jenisobat']) : '';
+            $nestedData['jenisobat']        = $nestedData['jenisobat_value'] !== '' ? htmlspecialchars($nestedData['jenisobat_value'], ENT_QUOTES, 'UTF-8') : '-';
             $nestedData['updated_by']       = $value['updated_by'];
             $nestedData['stok_barang']      = $value['stok_barang'].' '.$value['sat_barang'];
             $nestedData['sat_barang']       = $value['sat_barang'];

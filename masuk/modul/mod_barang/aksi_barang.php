@@ -136,4 +136,25 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 		$stmt->execute([$zataktif, $_POST['id_barang']]);
 		echo 'OK';
 	}
+	// Update rak obat inline
+	elseif ($module == 'barang' and $act == 'update_jenisobat') {
+		if (!isset($_POST['id_barang'])) {
+			http_response_code(400);
+			exit('ID barang tidak ditemukan');
+		}
+
+		$jenisobat = isset($_POST['jenisobat']) ? trim($_POST['jenisobat']) : '';
+		if ($jenisobat !== '') {
+			$stmt_cek = $db->prepare("SELECT COUNT(*) FROM jenis_obat WHERE jenisobat = ?");
+			$stmt_cek->execute([$jenisobat]);
+			if ((int) $stmt_cek->fetchColumn() === 0) {
+				http_response_code(400);
+				exit('Pilihan Rak Obat tidak valid');
+			}
+		}
+
+		$stmt = $db->prepare("UPDATE barang SET jenisobat = ? WHERE id_barang = ?");
+		$stmt->execute([$jenisobat, $_POST['id_barang']]);
+		echo 'OK';
+	}
 }

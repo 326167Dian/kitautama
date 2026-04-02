@@ -58,6 +58,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							<tr>
 								<th>No</th>
 								<th>Nama Barang</th>
+								<th style="text-align: center; ">Rak Obat</th>
 								<th style="text-align: center; ">Stok</th>
 								<th style="text-align: right; ">Harga Jual</th>
 								<th style="text-align: right; ">Zat Aktif</th>
@@ -106,6 +107,33 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 								<div class="modal-footer">
 									<button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
 									<button type="button" class="btn btn-primary" id="zataktif_modal_save">Simpan</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div id="jenisobatModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+									<h4 class="modal-title">Edit Rak Obat</h4>
+								</div>
+								<div class="modal-body">
+									<select id="jenisobat_modal_select" class="form-control">
+										<option value="">- Pilih Rak Obat -</option>
+										<?php
+										$rak_obat = $db->query("SELECT jenisobat FROM jenis_obat ORDER BY jenisobat ASC");
+										while ($rak = $rak_obat->fetch(PDO::FETCH_ASSOC)) {
+											$jenisobat_option = htmlspecialchars($rak['jenisobat'], ENT_QUOTES, 'UTF-8');
+											echo "<option value='{$jenisobat_option}'>{$jenisobat_option}</option>";
+										}
+										?>
+									</select>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+									<button type="button" class="btn btn-primary" id="jenisobat_modal_save">Simpan</button>
 								</div>
 							</div>
 						</div>
@@ -670,6 +698,23 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	}
 	#zataktifModal.is-open .modal-dialog {
 		margin: 10px auto;
+	}
+	#jenisobatModal.is-open {
+		display: block;
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.5);
+		z-index: 1050;
+		overflow: auto;
+	}
+	#jenisobatModal.is-open.fade {
+		opacity: 1;
+	}
+	#jenisobatModal.is-open .modal-content {
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+	}
+	#jenisobatModal.is-open .modal-dialog {
+		margin: 40px auto;
 	}
 </style>
 <script type="text/javascript">
