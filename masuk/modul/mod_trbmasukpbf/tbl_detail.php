@@ -16,6 +16,13 @@
         color: white;
 
     }
+
+    .qty-dtrbmasuk-inline {
+        width: 90px;
+        text-align: right;
+        margin-left: auto;
+        padding: 2px 6px;
+    }
 </style>
 <div class="box-body table-responsive">
     <table id="example5" class="table table-condensed table-bordered table-striped table-hover">
@@ -91,7 +98,12 @@
 											<td align=center>$no</td>           
 											 <td align=left>$r[kd_barang]</td>
 											 <td>$r[nmbrg_dtrbmasuk]</td>
-											 <td align=right>$r[qty_dtrbmasuk]</td>
+											 <td align=right>
+											    <input type='number' min='1' step='1' class='form-control input-sm qty-dtrbmasuk-inline' value='$r[qty_dtrbmasuk]'
+											        data-id_dtrbmasuk='$r[id_dtrbmasuk]'
+											        data-qty_lama='$r[qty_dtrbmasuk]'
+											        title='Ubah qty lalu tekan Enter'>
+											 </td>
 											 <td align=center>$r[sat_dtrbmasuk]</td>
 											 <td align=center>$r[no_batch]</td>
 											 <td align=center>".tgl_indo($r['exp_date'])."</td>
@@ -181,7 +193,52 @@
             <script>
                 $(document).ready(function() {
                     HitungDP();
-                    $("#example5").DataTable()
+                    $("#example5").DataTable();
+
+                    $('.qty-dtrbmasuk-inline').on('focus', function() {
+                        $(this).select();
+                    });
+
+                    $('.qty-dtrbmasuk-inline').on('keydown', function(e) {
+                        if (e.which == 13) {
+                            e.preventDefault();
+                            $(this).blur();
+                        }
+                    });
+
+                    $('.qty-dtrbmasuk-inline').on('change', function() {
+                        var input = $(this);
+                        var id_dtrbmasuk = input.data('id_dtrbmasuk');
+                        var qty_lama = input.data('qty_lama');
+                        var qty_dtrbmasuk = $.trim(input.val());
+
+                        if (qty_dtrbmasuk === '' || isNaN(qty_dtrbmasuk) || parseFloat(qty_dtrbmasuk) <= 0) {
+                            alert('Qty tidak valid');
+                            input.val(qty_lama);
+                            return;
+                        }
+
+                        input.prop('readonly', true);
+
+                        $.ajax({
+                            type: 'post',
+                            url: 'modul/mod_trbmasukpbf/simpandetail_qty.php',
+                            data: {
+                                id_dtrbmasuk: id_dtrbmasuk,
+                                qty_dtrbmasuk: qty_dtrbmasuk
+                            },
+                            success: function() {
+                                tabel_detail();
+                            },
+                            error: function(xhr) {
+                                alert(xhr.responseText || 'Gagal mengubah qty');
+                                input.val(qty_lama);
+                            },
+                            complete: function() {
+                                input.prop('readonly', false);
+                            }
+                        });
+                    });
                 });
 
 
