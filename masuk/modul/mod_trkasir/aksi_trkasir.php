@@ -24,21 +24,24 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
 	// Input admin
 	if ($module == 'trkasir' and $act == 'input_trkasir') {
-        
-        $cariitem = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir = ?");
-        $cariitem->execute([$_POST['kd_trkasir']]);
-        $countItem = $cariitem->rowCount();
+        header('Content-Type: application/json');
 
-        if($countItem <= 0){
-            $data['message'] = 'failed';
-			echo json_encode($data);
-        } else {
-    		$inserttrkasir = $db->prepare("INSERT INTO trkasir(
+        try {
+            $cariitem = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir = ?");
+            $cariitem->execute([$_POST['kd_trkasir']]);
+            $countItem = $cariitem->rowCount();
+
+            if($countItem <= 0){
+                $data['message'] = 'failed';
+                $data['error'] = 'Detail transaksi masih kosong.';
+			    echo json_encode($data);
+            } else {
+    		    $inserttrkasir = $db->prepare("INSERT INTO trkasir(
     										kd_trkasir,	
 											id_user,
     										petugas,
-    										shift,																		
-    										tgl_trkasir,																			
+    										shift,																				
+    										tgl_trkasir,																	
     										nm_pelanggan,										
     										tlp_pelanggan,
     										alamat_pelanggan,
@@ -53,10 +56,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 											jenistx,
 											waktu_trx
     										)
-    								 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    		$insert = $inserttrkasir->execute([$_POST['kd_trkasir'], $_POST['id_user'], $_POST['petugas'], $_POST['shift'], $_POST['tgl_trkasir'], $_POST['nm_pelanggan'], $_POST['tlp_pelanggan'], $_POST['alamat_pelanggan'], $_POST['kodetx'], $_POST['ttl_trkasir'], $_POST['diskon1'], $_POST['diskon2'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trkasir'], $_POST['id_carabayar'], $jnstx['tipe'], $datetime]);
+    									 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    		        $insert = $inserttrkasir->execute([$_POST['kd_trkasir'], $_POST['id_user'], $_POST['petugas'], $_POST['shift'], $_POST['tgl_trkasir'], $_POST['nm_pelanggan'], $_POST['tlp_pelanggan'], $_POST['alamat_pelanggan'], $_POST['kodetx'], $_POST['ttl_trkasir'], $_POST['diskon1'], $_POST['diskon2'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trkasir'], $_POST['id_carabayar'], $jnstx['tipe'], $datetime]);
 
-	        $db->prepare("update trkasir_detail set idadmin = ? where kd_trkasir = ?")->execute([$_POST['id_user'], $_POST['kd_trkasir']]);
+                $db->prepare("update trkasir_detail set idadmin = ? where kd_trkasir = ?")->execute([$_POST['id_user'], $_POST['kd_trkasir']]);
     
             $tgl_sekarang = date('Y-m-d H:i:s', time());
             $db->prepare("INSERT INTO kartu_stok(kode_transaksi, tgl_sekarang) VALUES(?,?)")->execute([$_POST['kd_trkasir'], $tgl_sekarang]);
@@ -89,12 +92,19 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     			echo json_encode($data);
     		}
 
+            }
+        } catch (Throwable $e) {
+            echo json_encode([
+                'message' => 'failed',
+                'error' => $e->getMessage()
+            ]);
         }
 		//echo "<script type='text/javascript'>alert('Transkasi berhasil ditambahkan !');window.location='../../media_admin.php?module=".$module."'</script>";
 	}
 
 	//updata trkasir
 	elseif ($module == 'trkasir' and $act == 'ubah_trkasir') {
+        header('Content-Type: application/json');
 
 		$stmt_update_trkasir = $db->prepare("UPDATE trkasir SET tgl_trkasir = ?,
 									petugas = ?,

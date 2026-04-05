@@ -2425,28 +2425,30 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         let resep = document.getElementById('resep').value;
         let komisi_dtrkasir = document.getElementById('komisi_dtrkasir').value;
         let id_admin = document.getElementById('id_admin').value;
+        let level = document.getElementById('level').value;
         var jns_transaksi = $('select[name="jns_transaksi"]').val();
 
         if (nmbrg_dtrkasir == "") {
             alert('Belum ada Item terpilih');
         } else if (qty_dtrkasir == "") {
             alert('Qty tidak boleh kosong');
-        } 
+        }
         // else if (parseInt(stok_barang) < parseInt(qty_dtrkasir)) {
         //     alert('Stok barang tidak mencukupi');
-        // } 
-        else if (parseInt(disc) > 100) {
+        // }
+        else if (parseInt(disc || 0, 10) > 100) {
             alert('Input Diskon lebih kecil dari 100');
-        }    
+        }
         else if (level == "petugas" && resep == "YA") {
     			alert('Transaksi resep hanya bisa di proses Apoteker');
-    //     } 
+    //     }
     //     else if (no_batch == "" && exp_date == "") {
   		// 	alert('No. batch tidak boleh kosong');
         } else {
             $.ajax({
                 type: 'post',
                 url: "modul/mod_trkasir/simpandetail_trkasir.php",
+                dataType: 'json',
                 data: {
                     'kd_trkasir': kd_trkasir,
                     'id_barang': id_barang,
@@ -2463,9 +2465,12 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     'id_admin': id_admin,
                     'tipe': jns_transaksi,
                 },
-                success: function(data) {
-                    //alert('Tambah data detail berhasil');
-                    
+                success: function(result) {
+                    if (result && result.status === 'error') {
+                        alert(result.data);
+                        return;
+                    }
+
                     document.getElementById("id_barang").value = "";
                     document.getElementById("kd_barang").value = "";
                     document.getElementById("nmbrg_dtrkasir").value = "";
@@ -2476,19 +2481,21 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     document.getElementById("batch").value = "";
                     document.getElementById("exp_date").value = "";
                     document.getElementById("komisi_dtrkasir").value = "";
-
                     document.getElementById("resep").value = "TIDAK";
-                    
 
-                    // let displayStok = stok_barang - qty_dtrkasir;
-                    // $('#stok_' + id_barang).html(displayStok);
                     $('#nmbrg_dtrkasir').focus();
-                    
                     tabel_detail();
-                    var result = JSON.parse(data);
-                    if(result.status === 'error'){
-                        alert(result.data);
-                    } 
+                },
+                error: function(xhr) {
+                    var pesan = 'Gagal menyimpan detail transaksi.';
+
+                    if (xhr.responseJSON && xhr.responseJSON.data) {
+                        pesan += '\n' + xhr.responseJSON.data;
+                    } else if (xhr.responseText) {
+                        pesan += '\n' + xhr.responseText.replace(/<[^>]*>/g, '').trim().substring(0, 300);
+                    }
+
+                    alert(pesan);
                 }
             });
         }
@@ -2599,27 +2606,23 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         var tlp_pelanggan = document.getElementById('tlp_pelanggan').value;
         var alamat_pelanggan = document.getElementById('alamat_pelanggan').value;
         var kodetx = document.getElementById('kodetx').value;
-        var ttl_trkasir = document.getElementById('ttl_trkasir').value;
-        var diskon2 = document.getElementById('diskon2').value;
-        var dp_bayar = document.getElementById('dp_bayar').value;
-        var sisa_bayar = document.getElementById('sisa_bayar').value;
-        
+        var ttl_trkasir = document.getElementById('ttl_trkasir').value || '0';
+        var diskon1 = document.getElementById('diskon').value || '0';
+        var diskon2 = document.getElementById('diskon2').value || '0';
+        var dp_bayar = document.getElementById('dp_bayar').value || '0';
+        var sisa_bayar = document.getElementById('sisa_bayar').value || '0';
         var ket_trkasir = document.getElementById('ket_trkasir').value;
         var stt_aksi = document.getElementById('stt_aksi').value;
         var id_carabayar = document.getElementById('id_carabayar').value;
 
+        var ttl_trkasir1x = ttl_trkasir.replace(/\./g, '');
+        var diskon1x = diskon1.replace(/\./g, '');
+        var diskon2x = diskon2.replace(/\./g, '');
+        var dp_bayar1x = dp_bayar.replace(/\./g, '');
+        var sisa_bayar1x = sisa_bayar.replace(/\./g, '');
 
-        var ttl_trkasir1 = ttl_trkasir.replace(".", "");
-        var dp_bayar1 = dp_bayar.replace(".", "");
-        var sisa_bayar1 = sisa_bayar.replace(".", "");
-
-        var ttl_trkasir1x = ttl_trkasir1.replace(".", "");
-        var dp_bayar1x = dp_bayar1.replace(".", "");
-        var sisa_bayar1x = sisa_bayar1.replace(".", "");
-
-
-        if (parseInt(dp_bayar1x) < parseInt(ttl_trkasir1x)) {
-            alert('Input Nominal Bayar Lebih besar dari harga');
+        if (parseInt(dp_bayar1x || 0, 10) < parseInt(ttl_trkasir1x || 0, 10)) {
+            alert('Input nominal bayar harus lebih besar atau sama dengan total harga');
         } else {
 
             $.ajax({
@@ -2639,7 +2642,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     'alamat_pelanggan': alamat_pelanggan,
                     'kodetx': kodetx,
                     'ttl_trkasir': ttl_trkasir1x,
-                    'diskon2': diskon2,
+                    'diskon1': diskon1x,
+                    'diskon2': diskon2x,
                     'dp_bayar': dp_bayar1x,
                     'sisa_bayar': sisa_bayar1x,
                     'ket_trkasir': ket_trkasir,
@@ -2647,16 +2651,25 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     'id_carabayar': id_carabayar
                 },
                 success: function(data) {
-                    // console.log(data);
-                    if (data.message == 'success') {
+                    if (data && data.message == 'success') {
                         window.open('modul/mod_laporan/struk.php?kd_trkasir=' + kd_trkasir, 'nama window', 'width=400,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no, scrollbars=no,resizable=yes,copyhistory=no');
                         alert('Proses berhasil !');
                         window.location = 'media_admin.php?module=trkasir';
-                        
                     } else {
-                        window.location.reload();
+                        alert((data && data.error) ? data.error : 'Simpan transaksi gagal.');
                     }
 
+                },
+                error: function(xhr) {
+                    var pesan = 'Gagal menyimpan transaksi.';
+
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        pesan += '\n' + xhr.responseJSON.error;
+                    } else if (xhr.responseText) {
+                        pesan += '\n' + xhr.responseText.replace(/<[^>]*>/g, '').trim().substring(0, 300);
+                    }
+
+                    alert(pesan);
                 }
 
                 //	success: function(data) {

@@ -1,6 +1,7 @@
 <?php 
 session_start();
 include "../../../configurasi/koneksi.php";
+header('Content-Type: application/json');
 
 try {
     $cekKolomResep = $db->prepare("SHOW COLUMNS FROM trkasir_detail LIKE 'resep'");
@@ -171,7 +172,7 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
         										tipe,
                                                 komisi,
                                                 idadmin)
-    	    							  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    	    							  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             $stmt_insert_trkasirdetail->execute([$kd_trkasir, $id_barang, $kd_barang, $nmbrg_dtrkasir, $qty_dtrkasir, $sat_dtrkasir, $hrgjual_dtrkasir, 
                                     $disc, $resep, $modal, $profit, $no_batch, $exp_date, $datetime, $ttlharga, $tipe, $komisi, $id_admin]);
         
@@ -438,5 +439,8 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
     }
 }
 
+echo json_encode(array(
+    "status" => "success"
+));
 
 ?>
