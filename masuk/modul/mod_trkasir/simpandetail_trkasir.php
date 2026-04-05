@@ -165,14 +165,15 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                                                 modal,
         										profit,
         										no_batch,
-        										exp_date,										
+        										exp_date,
+        										waktu,
         										hrgttl_dtrkasir,
         										tipe,
                                                 komisi,
                                                 idadmin)
     	    							  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             $stmt_insert_trkasirdetail->execute([$kd_trkasir, $id_barang, $kd_barang, $nmbrg_dtrkasir, $qty_dtrkasir, $sat_dtrkasir, $hrgjual_dtrkasir, 
-                                    $disc, $resep, $modal, $profit, $no_batch, $exp_date, $ttlharga, $tipe, $komisi, $id_admin]);
+                                    $disc, $resep, $modal, $profit, $no_batch, $exp_date, $datetime, $ttlharga, $tipe, $komisi, $id_admin]);
         
             $insertid_dtrkasir = $db->lastInsertId();
             

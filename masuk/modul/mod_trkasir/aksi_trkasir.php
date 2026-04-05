@@ -12,6 +12,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	$jenistx = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir='$_POST[kd_trkasir]' GROUP BY kd_trkasir");
 	$jenistx->execute();
 	$jnstx = $jenistx->fetch(PDO::FETCH_ASSOC);
+	$datetime = date('Y-m-d H:i:s', time());
 	
 	$module = "trkasir";
 	$stt_aksi = $_POST['stt_aksi'];
@@ -49,10 +50,11 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     										sisa_bayar,
     										ket_trkasir,
     										id_carabayar,
-											jenistx
+											jenistx,
+											waktu_trx
     										)
     								 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    		$insert = $inserttrkasir->execute([$_POST['kd_trkasir'], $_POST['id_user'], $_POST['petugas'], $_POST['shift'], $_POST['tgl_trkasir'], $_POST['nm_pelanggan'], $_POST['tlp_pelanggan'], $_POST['alamat_pelanggan'], $_POST['kodetx'], $_POST['ttl_trkasir'], $_POST['diskon1'], $_POST['diskon2'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trkasir'], $_POST['id_carabayar'], $jnstx['tipe']]);
+    		$insert = $inserttrkasir->execute([$_POST['kd_trkasir'], $_POST['id_user'], $_POST['petugas'], $_POST['shift'], $_POST['tgl_trkasir'], $_POST['nm_pelanggan'], $_POST['tlp_pelanggan'], $_POST['alamat_pelanggan'], $_POST['kodetx'], $_POST['ttl_trkasir'], $_POST['diskon1'], $_POST['diskon2'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trkasir'], $_POST['id_carabayar'], $jnstx['tipe'], $datetime]);
 
 	        $db->prepare("update trkasir_detail set idadmin = ? where kd_trkasir = ?")->execute([$_POST['id_user'], $_POST['kd_trkasir']]);
     

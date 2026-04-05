@@ -129,12 +129,16 @@ else{
                             $carabayar = $db->prepare("SELECT * FROM carabayar WHERE id_carabayar='$rb[id_carabayar]'");  
                             $carabayar->execute();
                             $bc = $carabayar->fetch(PDO::FETCH_ASSOC);
+                            
+                            $waktu  = date('d-F-Y H:i:s', strtotime($rb['waktu_trx']));
+                            
                             echo "
                             <table style='margin-bottom:10px;'>
                                 <tr><td style='width:40%;'>No</td><td>:</td><td>$no</td></tr>
                                 <tr><td>Nama Pelanggan</td><td>:</td><td>$rb[nm_pelanggan]</td></tr>
                                 <tr><td>Kode Transaksi</td><td>:</td><td>$rb[kd_trkasir]</td></tr>
                                 <tr><td>Metode Bayar</td><td>:</td><td>$bc[nm_carabayar]</td></tr>                                
+                                <tr><td>Waktu Transaksi</td><td>:</td><td>$waktu</td></tr>                                
                             </table>
                             ";
 

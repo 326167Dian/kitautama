@@ -186,7 +186,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="text" name="hrgjual[]" class="form-control hrgjual" readonly style="text-align:right">
+                                        <input type="text" name="hrgjual[]" data-hrg class="form-control hrgjual" readonly style="text-align:right">
                                     </td>
                                     <td>
                                         <input type="text" name="subtotal[]" class="form-control subtotal" readonly style="text-align:right">
@@ -392,11 +392,11 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="text" name="hrgjual[]" class="form-control hrgjual" value="<?=$r1['hrgjual_barang']?>" readonly style="text-align:right">
+                                        <input type="text" name="hrgjual[]" data-hargaawal="<?=$r1['hrgjual_barang']?>" class="form-control hrgjual" value="<?=$r1['hrgjual_barang']?>" readonly style="text-align:right">
                                     </td>
                                     <td>
                                         <div class="input-group">
-                                            <input type="text" name="subtotal[]" class="form-control subtotal" value="<?=$r1['subtotal']?>" readonly style="text-align:right">
+                                            <input type="text" name="subtotal[]" class="form-control subtotal" value="<?=format_rupiah($r1['subtotal'])?>" readonly style="text-align:right">
                                             <span class="input-group-btn">
                                                 <button class="btn btn-danger" type="button" id="hapus" data-idbundle_detail="<?=$r1['idbundle_detail']?>">
                                                     <i class="fa fa-trash"></i>
@@ -414,6 +414,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                     endwhile;
                                 ?>
                             </tbody>
+                            <tfoot>
+                                <td colspan="2">Total :</td>
+                                <td colspan="5" style="text-align:left"><div id="total"></div></td>
+                            </tfoot>
                         </table>
                         <!-- PANEL BUTTON FIX BOTTOM -->
                         <div class="form-footer-fixed">
@@ -773,6 +777,13 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	}
 </style>
 <script type="text/javascript">
+    
+    $(document).ready(function(){
+        var totalItem = hitungTotal();
+        $("#total_item").val(totalItem);
+        document.getElementById("total").innerHTML = formatRupiah(totalItem);
+    })
+    
 	// Inisialisasi CKEditor untuk form tambah
 	if (document.getElementById('content')) {
 		CKEDITOR.replace('content', {
@@ -875,7 +886,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     panel.append('<div class="autocomplete-header">Hasil Pencarian</div>');
     
                     data.forEach(function(item){
-                        // console.log(item)
+                        // console.log(item)});
                         var html = `
                         <div class="autocomplete-item"
                              data-kode="${item.kd_barang}"
@@ -1005,6 +1016,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         $rrow.find(".satuan").val(satuan);
         $rrow.find(".qty").val("1");
         $rrow.find(".hrgjual").val(formatRupiah(hrgjual));
+        $rrow.find(".hrgjual").attr('data-hargaawal', hrgjual);
         $rrow.find(".subtotal").val(formatRupiah(hrgjual));
         
         var totalItem = hitungTotal();
@@ -1033,7 +1045,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         if(opsi === "custom"){
             $rrow.find(".hrgjual").removeAttr("readonly");
         } else {
-            var hrglama = $(".autocomplete-item").data("hrgjual");
+            // var hrglama = $(".autocomplete-item").data("hrgjual");
+            var hrglama = $rrow.find(".hrgjual").data('hargaawal');
             $rrow.find(".hrgjual").attr("readonly","true");
             $rrow.find(".hrgjual").val(formatRupiah(hrglama));
             
@@ -1044,6 +1057,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             var totalItem = hitungTotal();
             $("#total_item").val(totalItem);
             document.getElementById("total").innerHTML = formatRupiah(totalItem);
+            
         }
     });
 
