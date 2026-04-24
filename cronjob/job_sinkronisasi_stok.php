@@ -49,19 +49,19 @@ if (mysqli_query($conn, $sinkronisasi)) {
 }
 mysqli_query($conn, "INSERT INTO job_sinkronisasi_stok (keterangan, waktu) VALUES ('$text','$datetime')");
 
-$batch = "
-    UPDATE batch b
-    LEFT JOIN (
-        SELECT kd_trbmasuk,kd_barang,no_batch,qty_dtrbmasuk AS totalbeli
-        FROM trbmasuk_detail
-    ) beli ON beli.kd_barang = b.kd_barang AND beli.kd_trbmasuk = b.kd_transaksi AND beli.no_batch = b.no_batch
-    SET b.qty = COALESCE(beli.totalbeli, 0)
-    WHERE b.status = 'masuk'
-    AND b.kd_transaksi = beli.kd_trbmasuk
-    AND b.kd_barang = beli.kd_barang
-    AND b.no_batch = beli.no_batch
-";
-mysqli_query($conn, $batch);
+// $batch = "
+//     UPDATE batch b
+//     LEFT JOIN (
+//         SELECT kd_trbmasuk,kd_barang,no_batch,qty_dtrbmasuk AS totalbeli
+//         FROM trbmasuk_detail
+//     ) beli ON beli.kd_barang = b.kd_barang AND beli.kd_trbmasuk = b.kd_transaksi AND beli.no_batch = b.no_batch
+//     SET b.qty = COALESCE(beli.totalbeli, 0)
+//     WHERE b.status = 'masuk'
+//     AND b.kd_transaksi = beli.kd_trbmasuk
+//     AND b.kd_barang = beli.kd_barang
+//     AND b.no_batch = beli.no_batch
+// ";
+// mysqli_query($conn, $batch);
 
 // Tutup koneksi
 mysqli_close($conn);

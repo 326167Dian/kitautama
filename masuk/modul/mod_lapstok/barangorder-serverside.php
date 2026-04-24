@@ -66,7 +66,7 @@ if ($_GET['action'] == "table_data") {
 
             // for column
             $nestedData['no'] = $no;
-            $nestedData['kd_barang'] = $value['kd_barang'];
+            $nestedData['kd_barang'] = (string)$value['kd_barang'];
             $nestedData['nm_barang'] = $value['nm_barang'];
             $nestedData['stok_barang'] = $value['stok_barang'];
             $nestedData['satuan'] = $value['sat_barang'];

@@ -37,8 +37,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     <td><a class='btn btn-danger btn-flat' href='modul/mod_trkasir/barangmacet.php' target='_blank'>DOWNLOAD STOK MACET</a></td>
                     <?php
                     $lupa = $_SESSION['level'];
-                    if ($lupa == 'pemilik') {
-                        echo " <a class='btn  btn-info btn-flat' href='?module=trkasir&act=cari2'>CARI BERDASARKAN NO TRANSAKSI</a>";
+                    if ($_SESSION['username'] == 'ernawati') {
+                        echo " <a class='btn  btn-info btn-flat' href='?module=trkasir&act=cari2'>CARI BERDASARKAN NO TRANSAKSI</a>
+                        <a class='btn  btn-info btn-warning' href='?module=trkasir&act=terhapus'>Item Penjualan Terhapus</a>
+                        ";
                     }
                     ?>
                     <?php
@@ -1267,6 +1269,87 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				
 			</div>";
 
+            break;
+        case "terhapus":
+            if ($_SESSION['level'] != 'pemilik') {
+                echo "<script type='text/javascript'>alert('Menu ini hanya untuk pemilik.');window.location='media_admin.php?module=trkasir';</script>";
+                break;
+            }
+
+            $hist_penjualan = $db->prepare("SELECT h.*, a.nama_lengkap AS nama_admin, t.tgl_trkasir, t.nm_pelanggan
+                                            FROM trkasir_detail_hist h
+                                            LEFT JOIN admin a ON h.idadmin = a.id_admin
+                                            LEFT JOIN trkasir t ON h.kd_trkasir = t.kd_trkasir
+                                            ORDER BY h.id_dtrkasir DESC, h.waktu DESC");
+            $hist_penjualan->execute();
+        ?>
+            <div class="box box-warning box-solid table-responsive">
+                <div class="box-header with-border">
+                    <h3 class="box-title">ITEM PENJUALAN TERHAPUS</h3>
+                    <div class="box-tools pull-right">
+                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="box-body table-responsive">
+                    <a class='btn btn-primary btn-flat' href='?module=trkasir'>KEMBALI KE TRANSAKSI</a>
+                    <br><br>
+
+                    <table id="example1" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Waktu Histori</th>
+                                <th>No Transaksi</th>
+                                <th>Tanggal</th>
+                                <th>Pelanggan</th>
+                                <th>Kode Barang</th>
+                                <th>Nama Barang</th>
+                                <th>Qty</th>
+                                <th>Satuan</th>
+                                <th>Harga</th>
+                                <th>Disc</th>
+                                <th>Total</th>
+                                <th>Petugas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $no = 1;
+                            while ($rh = $hist_penjualan->fetch(PDO::FETCH_ASSOC)) {
+                                $tgl_transaksi = !empty($rh['tgl_trkasir']) ? $rh['tgl_trkasir'] : '-';
+                                $pelanggan = !empty($rh['nm_pelanggan']) ? $rh['nm_pelanggan'] : '-';
+                                $waktu_hist = !empty($rh['waktu']) ? date('d-m-Y H:i:s', strtotime($rh['waktu'])) : '-';
+                                $harga_jual = format_rupiah($rh['hrgjual_dtrkasir']);
+                                $harga_total = format_rupiah($rh['hrgttl_dtrkasir']);
+                                $petugas_hist = !empty($rh['nama_admin']) ? $rh['nama_admin'] : '-';
+
+                                echo "<tr>
+                                        <td>$no</td>
+                                        <td>$waktu_hist</td>
+                                        <td>$rh[kd_trkasir]</td>
+                                        <td>$tgl_transaksi</td>
+                                        <td>$pelanggan</td>
+                                        <td>$rh[kd_barang]</td>
+                                        <td>$rh[nmbrg_dtrkasir]</td>
+                                        <td align='center'>$rh[qty_dtrkasir]</td>
+                                        <td align='center'>$rh[sat_dtrkasir]</td>
+                                        <td align='right'>$harga_jual</td>
+                                        <td align='center'>$rh[disc] %</td>
+                                        <td align='right'>$harga_total</td>
+                                        <td>$petugas_hist</td>
+                                      </tr>";
+                                $no++;
+                            }
+
+                            if ($no == 1) {
+                                echo "<tr><td colspan='13' align='center'>Belum ada data item penjualan terhapus.</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php
             break;
             
 

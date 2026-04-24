@@ -91,7 +91,7 @@ while ($row = $dataStmt->fetch(PDO::FETCH_ASSOC)) {
         : '<span style="display:block;background-color:#ffbf00;">' . $no . '</span>';
 
     $kodeCell = $isLunas
-        ? $row['kd_trbmasuk']
+        ? (string)$row['kd_trbmasuk']
         : '<span style="display:block;background-color:#ffbf00;">' . $row['kd_trbmasuk'] . '</span>';
 
     $aksiHtml = "<a href='?module=byrkredit&act=ubah&id=" . $row['id_trbmasuk'] . "' title='EDIT' class='btn btn-warning btn-xs'>EDIT</a> "

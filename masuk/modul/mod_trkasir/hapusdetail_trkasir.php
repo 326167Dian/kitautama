@@ -66,29 +66,29 @@ if ($getkode == 'BUND') {
     
 }
 
-// Insert into history
-// $stmt_insert_hist = $db->prepare("INSERT INTO trkasir_detail_hist (
-//                                             kd_trkasir,
-//                                             id_barang,
-//                                             kd_barang,
-//                                             nmbrg_dtrkasir,
-//                                             qty_dtrkasir,
-//                                             sat_dtrkasir,
-//                                             hrgjual_dtrkasir,
-//                                             disc,
-//                                             hrgttl_dtrkasir,
-//                                             no_batch,
-//                                             exp_date,
-//                                             waktu,
-//                                             tipe,
-//                                             komisi,
-//                                             idadmin
-//                                             ) 
-//                                         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-// $stmt_insert_hist->execute([$r['kd_trkasir'],$r['id_barang'],$r['kd_barang'],$r['nmbrg_dtrkasir'],$r['qty_dtrkasir'],
-//                             $r['sat_dtrkasir'],$r['hrgjual_dtrkasir'],$r['disc'],
-//                             $r['hrgttl_dtrkasir'],$r['no_batch'],$r['exp_date'],$r['waktu'],$r['tipe'],$r['komisi'],$r['idadmin']]);
-// Hapus detail
+//Insert into history
+$stmt_insert_hist = $db->prepare("INSERT INTO trkasir_detail_hist (
+                                            kd_trkasir,
+                                            id_barang,
+                                            kd_barang,
+                                            nmbrg_dtrkasir,
+                                            qty_dtrkasir,
+                                            sat_dtrkasir,
+                                            hrgjual_dtrkasir,
+                                            disc,
+                                            hrgttl_dtrkasir,
+                                            no_batch,
+                                            exp_date,
+                                            waktu,
+                                            tipe,
+                                            komisi,
+                                            idadmin
+                                            ) 
+                                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+$stmt_insert_hist->execute([$r['kd_trkasir'],$r['id_barang'],$r['kd_barang'],$r['nmbrg_dtrkasir'],$r['qty_dtrkasir'],
+                            $r['sat_dtrkasir'],$r['hrgjual_dtrkasir'],$r['disc'],
+                            $r['hrgttl_dtrkasir'],$r['no_batch'],$r['exp_date'],$r['waktu'],$r['tipe'],$r['komisi'],$r['idadmin']]);
+//Hapus detail
 $stmt_del_trkasirdetail = $db->prepare("DELETE FROM trkasir_detail WHERE id_dtrkasir = '$id_dtrkasir'");
 $stmt_del_trkasirdetail->execute();
 

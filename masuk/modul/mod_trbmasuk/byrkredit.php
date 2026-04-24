@@ -497,7 +497,10 @@ switch($_GET['act']){
 												 data-nm_barang='$rd[nm_barang]'
 												 data-stok_barang='$rd[stok_barang]'
 												 data-sat_barang='$rd[sat_barang]'
-												 data-hrgsat_barang='$rd[hrgsat_barang]'>
+												 data-hrgsat_barang='$rd[hrgsat_barang]'
+												 data-hrgjual_barang='$rd[hrgjual_barang]'
+                                                 data-hrgjual_barang1='$rd[hrgjual_barang1]'
+                                                 data-hrgjual_barang2='$rd[hrgjual_barang2]'>
 												 <i class='fa fa-check'></i>
 												 </button>
 												
@@ -609,6 +612,7 @@ switch($_GET['act']){
 		$('#nmbrg_dtrbmasuk').on('keydown', function(e) {
 			if (e.which == 13) {
 				let nm_barang = $('#nmbrg_dtrbmasuk').val();
+				
 				$.ajax({
 					url: 'modul/mod_trbmasuk/autonamabarang_enter.php',
 					type: 'post',
@@ -616,7 +620,7 @@ switch($_GET['act']){
 						'nm_barang': nm_barang
 					},
 				}).success(function(response) {
-					let data = $.parseJSON(response);
+				    let data = $.parseJSON(response);
 					// let data = JSON.parse(response)
 					let qty_default = "1";
 
@@ -633,7 +637,7 @@ switch($_GET['act']){
 						document.getElementById('hrgjual_dtrbmasuk_resep').value = data.hrgjual_barang1;
 						document.getElementById('hrgjual_dtrbmasuk_nakes').value = data.hrgjual_barang2;
 						document.getElementById('hrgsat_dtrbmasuk').value = data.hrgsat_barang;
-						document.getElementById('indikasi').value = data.indikasi;
+						
 					}
 
 				});
@@ -667,81 +671,81 @@ switch($_GET['act']){
 				document.getElementById('hrgjual_dtrbmasuk_resep').value = data.hrgjual_barang1;
 				document.getElementById('hrgjual_dtrbmasuk_nakes').value = data.hrgjual_barang2;
 				document.getElementById('hrgsat_dtrbmasuk').value = data.hrgsat_barang;
-				document.getElementById('indikasi').value = data.indikasi;
+				
 			}
 
 		});
 	})
 
 
-	$(document).on('click', '#kode', function() {
-		$("#example").DataTable().destroy();
+// 	$(document).on('click', '#kode', function() {
+// 		$("#example").DataTable().destroy();
 
-		$("#example").DataTable({
-			processing: true,
-			serverSide: true,
-			ajax: {
-				"url": "modul/mod_trbmasuk/barang-serverside.php?action=table_data",
-				"dataType": "JSON",
-				"type": "POST"
-			},
-			columns: [{
-					"data": "no",
-					"className": 'text-center',
-				},
-				{
-					"data": "kd_barang"
-				},
-				{
-					"data": "nm_barang"
-				},
-				{
-					"data": "stok_barang",
-					"className": 'text-center',
-				},
-				{
-					"data": "sat_barang",
-					"className": 'text-center',
-				},
-				{
-					"data": "hrgsat_barang",
-					"className": 'text-right',
-					"render": function(data, type, row) {
-						return formatRupiah(data);
-					}
-				},
-				{
-					"data": "hrgjual_barang",
-					"className": 'text-right',
-					"render": function(data, type, row) {
-						return formatRupiah(data);
-					}
-				},
-				{
-					"data": "pilih",
-					"className": 'text-center'
-				},
-			],
-			"footerCallback": function(row, data, start, end, display) {
-				// console.log(row);
-			}
-		})
+// 		$("#example").DataTable({
+// 			processing: true,
+// 			serverSide: true,
+// 			ajax: {
+// 				"url": "modul/mod_trbmasuk/barang-serverside.php?action=table_data",
+// 				"dataType": "JSON",
+// 				"type": "POST"
+// 			},
+// 			columns: [{
+// 					"data": "no",
+// 					"className": 'text-center',
+// 				},
+// 				{
+// 					"data": "kd_barang"
+// 				},
+// 				{
+// 					"data": "nm_barang"
+// 				},
+// 				{
+// 					"data": "stok_barang",
+// 					"className": 'text-center',
+// 				},
+// 				{
+// 					"data": "sat_barang",
+// 					"className": 'text-center',
+// 				},
+// 				{
+// 					"data": "hrgsat_barang",
+// 					"className": 'text-right',
+// 					"render": function(data, type, row) {
+// 						return formatRupiah(data);
+// 					}
+// 				},
+// 				{
+// 					"data": "hrgjual_barang",
+// 					"className": 'text-right',
+// 					"render": function(data, type, row) {
+// 						return formatRupiah(data);
+// 					}
+// 				},
+// 				{
+// 					"data": "pilih",
+// 					"className": 'text-center'
+// 				},
+// 			],
+// 			"footerCallback": function(row, data, start, end, display) {
+// 				// console.log(row);
+// 			}
+// 		})
 
-	});
+// 	});
 
 
 	$(document).on('click', '#pilihbarang', function() {
 
-		var id_barang = $(this).data('id_barang');
-		var kd_barang = $(this).data('kd_barang');
-		var nm_barang = $(this).data('nm_barang');
-		var stok_barang = $(this).data('stok_barang');
-		var sat_barang = $(this).data('sat_barang');
-		var hrgsat_barang = $(this).data('hrgsat_barang');
-		var hrgjual_barang = $(this).data('hrgjual_barang');
-		var hrgjual_barang_resep = $(this).data('hrgjual_barang1');
-		var hrgjual_barang_nakes = $(this).data('hrgjual_barang2');
-		var qty_default = "1";
+		var id_barang               = $(this).data('id_barang');
+		var kd_barang               = $(this).data('kd_barang');
+		var nm_barang               = $(this).data('nm_barang');
+		var stok_barang             = $(this).data('stok_barang');
+		var sat_barang              = $(this).data('sat_barang');
+		var hrgsat_barang           = $(this).data('hrgsat_barang');
+		var hrgjual_barang          = $(this).data('hrgjual_barang');
+		var hrgjual_barang_resep    = $(this).data('hrgjual_barang1');
+		var hrgjual_barang_nakes    = $(this).data('hrgjual_barang2');
+		var qty_default             = "1";
 
 		document.getElementById('id_barang').value = id_barang;
 		document.getElementById('kd_barang').value = kd_barang;
@@ -756,7 +760,6 @@ switch($_GET['act']){
 		//hilangkan modal
 		$(".close").click();
 		
-		console.log(hrgjual_barang + ' - ' + hrgjual_barang_resep + ' - ' + hrgjual_barang_nakes)
 
 	});
 

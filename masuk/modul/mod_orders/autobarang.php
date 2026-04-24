@@ -17,7 +17,7 @@ include "../../../configurasi/koneksi.php";
         			'indikasi'          => $re['indikasi'],
         			'hrgjual_barang'    => $re['hrgjual_barang'],
         			'hrgsat_barang'     => $re['hrgsat_barang'],
-        			'kd_barang'         => $re['kd_barang']
+        			'kd_barang'         => (string)$re['kd_barang']
 					);
  
 	echo json_encode($json);

@@ -28,20 +28,20 @@ if($ubah->rowCount() > 0){
         $harga_level4 = isset($re['hrgjual_barang4']) ? $re['hrgjual_barang4'] : $harga_level3;
         $harga_level5 = isset($re['hrgjual_barang5']) ? $re['hrgjual_barang5'] : $harga_level4;
         $json[] = array(
-                    'id_barang'=> $re['id_barang'],
-        			'nm_barang'=> $re['nm_barang'],
-                    'jenisobat'=> $re['jenisobat'],
-        			'stok_barang'=> $re['stok_barang'],
-        			'sat_barang'=> $re['sat_barang'],
+                    'id_barang'         => $re['id_barang'],
+        			'nm_barang'         => $re['nm_barang'],
+                    'jenisobat'         => $re['jenisobat'],
+        			'stok_barang'       => $re['stok_barang'],
+        			'sat_barang'        => $re['sat_barang'],
         // 			'indikasi'=> $re['indikasi'],
-        			'hrgjual_barang'=> $harga_dasar,
-        			'hrgjual_barang1'=> $harga_level1,
-        			'hrgjual_barang2'=> $harga_level2,
-        			'hrgjual_barang3'=> $harga_level3,
-        			'hrgjual_barang4'=> $harga_level4,
-        			'hrgjual_barang5'=> $harga_level5,
-        			'kd_barang'=> $re['kd_barang'],
-        			'komisi'=> $re['komisi'],
+        			'hrgjual_barang'    => $harga_dasar,
+        			'hrgjual_barang1'   => $harga_level1,
+        			'hrgjual_barang2'   => $harga_level2,
+        			'hrgjual_barang3'   => $harga_level3,
+        			'hrgjual_barang4'   => $harga_level4,
+        			'hrgjual_barang5'   => $harga_level5,
+        			'kd_barang'         => (string)$re['kd_barang'],
+        			'komisi'            => $re['komisi'],
     			);
     }
 } else {
@@ -55,7 +55,7 @@ if($ubah->rowCount() > 0){
             'stok_barang'       => $rs['qty_bundle'],
             'sat_barang'        => $rs['sat_bundle'],
             'hrgjual_barang'    => $rs['hrgjual_bundle'],
-            'kd_barang'         => $rs['kd_bundle']
+            'kd_barang'         => (string)$rs['kd_bundle']
         );
         
     }
