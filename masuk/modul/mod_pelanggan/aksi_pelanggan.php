@@ -60,6 +60,19 @@ function build_riwayat_obat_items($db, $obatKds, $aturanPakaiList){
     ];
 }
 
+function get_riwayat_obat_table_name($db){
+    $candidates = ['riwayat_pelanggan_obat', 'tabel_riwayat_pelanggan_obat'];
+    foreach ($candidates as $tableName) {
+        $stmt = $db->prepare("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? LIMIT 1");
+        $stmt->execute([$tableName]);
+        if ($stmt->fetchColumn() !== false) {
+            return $tableName;
+        }
+    }
+
+    return '';
+}
+
 $module=$_GET['module'];
 $act=$_GET['act'];
 
@@ -151,8 +164,8 @@ elseif ($module=='pelanggan' AND $act=='input_riwayat'){
     $aturan_pakai = isset($_POST['aturan_pakai']) ? $_POST['aturan_pakai'] : [];
     $followup = trim($_POST['followup']);
 
-    $tableCheck = $db->query("SHOW TABLES LIKE 'riwayat_pelanggan_obat'");
-    if ($tableCheck->rowCount() < 1) {
+    $riwayatObatTable = get_riwayat_obat_table_name($db);
+    if ($riwayatObatTable === '') {
         $_SESSION['flash'] = "<div class='alert alert-danger'>Tabel detail obat belum ada. Jalankan migration terbaru dulu.</div>";
         header('location:../../media_admin.php?module='.$module.'&act=riwayat&id='.$id_p);
         exit;
@@ -191,7 +204,7 @@ elseif ($module=='pelanggan' AND $act=='input_riwayat'){
         $stmt->execute([$id_p, $tgl, $diagnosa, $tindakan, $followup]);
 
         $id_riwayat = (int) $db->lastInsertId();
-        $detailStmt = $db->prepare("INSERT INTO riwayat_pelanggan_obat(id_riwayat, kd_barang, nm_barang, aturan_pakai, created_at)
+        $detailStmt = $db->prepare("INSERT INTO " . $riwayatObatTable . "(id_riwayat, kd_barang, nm_barang, aturan_pakai, created_at)
                                     VALUES(?, ?, ?, ?, NOW())");
         foreach ($obatItems as $item) {
             $detailStmt->execute([$id_riwayat, $item['kd_barang'], $item['nm_barang'], $item['aturan_pakai']]);
@@ -229,8 +242,8 @@ elseif ($module=='pelanggan' AND $act=='update_riwayat'){
     $aturan_pakai = isset($_POST['aturan_pakai']) ? $_POST['aturan_pakai'] : [];
     $followup = trim($_POST['followup']);
 
-    $tableCheck = $db->query("SHOW TABLES LIKE 'riwayat_pelanggan_obat'");
-    if ($tableCheck->rowCount() < 1) {
+    $riwayatObatTable = get_riwayat_obat_table_name($db);
+    if ($riwayatObatTable === '') {
         $_SESSION['flash'] = "<div class='alert alert-danger'>Tabel detail obat belum ada. Jalankan migration terbaru dulu.</div>";
         header('location:../../media_admin.php?module='.$module.'&act=edit_riwayat&id='.$id_p.'&idr='.$id_r);
         exit;
@@ -266,9 +279,9 @@ elseif ($module=='pelanggan' AND $act=='update_riwayat'){
         $stmt = $db->prepare("UPDATE riwayat_pelanggan SET tgl = ?, diagnosa = ?, tindakan = ?, followup = ? WHERE id = ?");
         $stmt->execute([$tgl, $diagnosa, $tindakan, $followup, $id_r]);
 
-        $db->prepare("DELETE FROM riwayat_pelanggan_obat WHERE id_riwayat = ?")->execute([$id_r]);
+        $db->prepare("DELETE FROM " . $riwayatObatTable . " WHERE id_riwayat = ?")->execute([$id_r]);
 
-        $detailStmt = $db->prepare("INSERT INTO riwayat_pelanggan_obat(id_riwayat, kd_barang, nm_barang, aturan_pakai, created_at)
+        $detailStmt = $db->prepare("INSERT INTO " . $riwayatObatTable . "(id_riwayat, kd_barang, nm_barang, aturan_pakai, created_at)
                                     VALUES(?, ?, ?, ?, NOW())");
         foreach ($obatItems as $item) {
             $detailStmt->execute([$id_r, $item['kd_barang'], $item['nm_barang'], $item['aturan_pakai']]);
@@ -306,7 +319,10 @@ elseif ($module=='pelanggan' AND $act=='hapus_riwayat'){
     }
     $row = $q->fetch(PDO::FETCH_ASSOC);
     $id_p = $row['id_pelanggan'];
-    $db->prepare("DELETE FROM riwayat_pelanggan_obat WHERE id_riwayat = ?")->execute([$id]);
+    $riwayatObatTable = get_riwayat_obat_table_name($db);
+    if ($riwayatObatTable !== '') {
+        $db->prepare("DELETE FROM " . $riwayatObatTable . " WHERE id_riwayat = ?")->execute([$id]);
+    }
     $stmt = $db->prepare("DELETE FROM riwayat_pelanggan WHERE id = ?");
     $stmt->execute([$id]);
     unset($_SESSION['csrf_pelanggan']);

@@ -12,6 +12,21 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
 	$aksi = "modul/mod_pelanggan/aksi_pelanggan.php";
 	$aksi_pelanggan = "masuk/modul/mod_pelanggan/aksi_pelanggan.php";
+	if (!function_exists('get_riwayat_obat_table_name')) {
+		function get_riwayat_obat_table_name($db)
+		{
+			$candidates = array('riwayat_pelanggan_obat', 'tabel_riwayat_pelanggan_obat');
+			foreach ($candidates as $tableName) {
+				$stmt = $db->prepare("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? LIMIT 1");
+				$stmt->execute(array($tableName));
+				if ($stmt->fetchColumn() !== false) {
+					return $tableName;
+				}
+			}
+
+			return '';
+		}
+	}
 	switch (isset($_GET['act']) ? $_GET['act'] : '') {
 			// Tampil Siswa
 		default:
@@ -178,7 +193,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			$stmt = $db->prepare("SELECT * FROM pelanggan WHERE id_pelanggan = ?");
 			$stmt->execute([$_GET['id']]);
 			$p = $stmt->fetch(PDO::FETCH_ASSOC);
-			$has_riwayat_obat_table = ($db->query("SHOW TABLES LIKE 'riwayat_pelanggan_obat'")->rowCount() > 0);
+			$riwayat_obat_table = get_riwayat_obat_table_name($db);
+			$has_riwayat_obat_table = ($riwayat_obat_table !== '');
 			// Generate CSRF token for riwayat actions if not set
 			if (!isset($_SESSION['csrf_pelanggan']) || empty($_SESSION['csrf_pelanggan'])) {
 				if (function_exists('random_bytes')) {
@@ -329,7 +345,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			$obat_map = [];
 			if ($has_riwayat_obat_table && count($riwayat_ids) > 0) {
 				$in_placeholders = implode(',', array_fill(0, count($riwayat_ids), '?'));
-				$obat_stmt = $db->prepare("SELECT id_riwayat, kd_barang, nm_barang, aturan_pakai FROM riwayat_pelanggan_obat WHERE id_riwayat IN ($in_placeholders) ORDER BY id ASC");
+				$obat_stmt = $db->prepare("SELECT id_riwayat, kd_barang, nm_barang, aturan_pakai FROM " . $riwayat_obat_table . " WHERE id_riwayat IN ($in_placeholders) ORDER BY id ASC");
 				$obat_stmt->execute($riwayat_ids);
 				while ($ob = $obat_stmt->fetch(PDO::FETCH_ASSOC)) {
 					$txt = htmlspecialchars($ob['nm_barang']);
@@ -348,6 +364,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				$delete_link = $aksi."?module=pelanggan&act=hapus_riwayat&id=".$rw['id']."&token=".$token;
 				$obat_tindakan = isset($obat_map[$rw['id']]) ? implode("<br>", $obat_map[$rw['id']]) : htmlspecialchars($rw['tindakan']);
 				$tgl_followup = (isset($rw['tgl_followup']))? $rw['tgl_followup']:'<button type="button" data-id="'.$rw['id'].'" class="tgl_followup btn btn-danger">Klik untuk followup</button>';
+				$followup_by = isset($rw['followup_by']) && $rw['followup_by'] !== '' ? htmlspecialchars((string)$rw['followup_by']) : '-';
 				echo "<tr>
 					<td>$no</td>
 					<td>$rw[tgl]</td>
@@ -355,7 +372,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 					<td>$obat_tindakan</td>
 					<td>$rw[followup]</td>
 					<td>$tgl_followup</td>
-					<td>$rw[followup_by]</td>
+					<td>$followup_by</td>
 					<td>$rw[created_at]</td>
 					<td>
 						<a href='".$edit_link."' title='EDIT' class='btn btn-warning btn-xs'>EDIT</a>
@@ -379,10 +396,11 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			}
 			$rw = $stmt->fetch(PDO::FETCH_ASSOC);
 			$token = isset($_SESSION['csrf_pelanggan']) ? $_SESSION['csrf_pelanggan'] : '';
-			$has_riwayat_obat_table = ($db->query("SHOW TABLES LIKE 'riwayat_pelanggan_obat'")->rowCount() > 0);
+			$riwayat_obat_table = get_riwayat_obat_table_name($db);
+			$has_riwayat_obat_table = ($riwayat_obat_table !== '');
 			$riwayat_obat = [];
 			if ($has_riwayat_obat_table) {
-				$riwayat_obat_stmt = $db->prepare("SELECT kd_barang, nm_barang, aturan_pakai FROM riwayat_pelanggan_obat WHERE id_riwayat = ? ORDER BY id ASC");
+				$riwayat_obat_stmt = $db->prepare("SELECT kd_barang, nm_barang, aturan_pakai FROM " . $riwayat_obat_table . " WHERE id_riwayat = ? ORDER BY id ASC");
 				$riwayat_obat_stmt->execute([$rw['id']]);
 				$riwayat_obat = $riwayat_obat_stmt->fetchAll(PDO::FETCH_ASSOC);
 			}
