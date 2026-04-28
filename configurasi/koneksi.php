@@ -1,32 +1,30 @@
 <?php
-// Date_Default_timezone_set('Asia/jakarta');
-// $server = "localhost";
-// $user = "u877780297_retnobaru";
-// $password = "7390091979Dian&&";
-// $database = "u877780297_citrasehatbaru";
-// set_time_limit(1800);
 
-// try {
-//     $dsn = "mysql:host=$server;dbname=$database;charset=utf8";
-//     $db = new PDO($dsn, $user, $password);
-//     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-//     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-// } catch (PDOException $e) {
-//     die("Koneksi gagal: " . $e->getMessage());
-// }
+// Load helper koneksi rahasia dari folder yang sama.
+$hiddenConnectionFiles = array('.terhubung.php', '.terhubung');
+$loadedHelper = false;
 
-
-$server = "localhost";
-$user = "root";
-$password = "";
-$database = "kitautama";
-set_time_limit(1800);
-
-try {
-    $dsn = "mysql:host=$server;dbname=$database;charset=utf8";
-    $db = new PDO($dsn, $user, $password);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Koneksi gagal: " . $e->getMessage());
+foreach ($hiddenConnectionFiles as $helperFile) {
+	$helperPath = __DIR__ . DIRECTORY_SEPARATOR . $helperFile;
+	if (is_file($helperPath)) {
+		require_once $helperPath;
+		$loadedHelper = true;
+		break;
+	}
 }
+
+if (!$loadedHelper) {
+	die('File koneksi rahasia tidak ditemukan. Gunakan .terhubung atau .terhubung.php di folder configurasi.');
+}
+
+if (!class_exists('Database')) {
+	die('Class Database tidak ditemukan pada file koneksi rahasia.');
+}
+
+$databaseConnector = new Database();
+$db = $databaseConnector->connect();
+
+// Alias untuk kompatibilitas file lama yang memakai variabel $conn.
+$conn = $db;
+
+?>
