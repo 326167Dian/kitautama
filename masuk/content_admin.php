@@ -409,6 +409,11 @@ elseif ($_GET['module'] == 'homecare') {
     include "modul/mod_homecare/homecare.php";
 }
 
+// Bagian swamedikasi
+elseif ($_GET['module'] == 'swamedikasi') {
+    include "modul/mod_swamedikasi/swamedikasi.php";
+}
+
 // Bagian supplier
 elseif ($_GET['module'] == 'supplier') {
     include "modul/mod_supplier/supplier.php";
