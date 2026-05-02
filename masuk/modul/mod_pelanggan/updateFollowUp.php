@@ -2,15 +2,46 @@
 session_start();
 include "../../../configurasi/koneksi.php";
 
-$id = $_POST['id'];
-$datetime = date('Y-m-d H:i:s', time());
+header('Content-Type: application/json');
 
-$stmt = $db->prepare("UPDATE riwayat_pelanggan 
-                        SET tgl_followup    = ?,
-                            followup_by     =?            
-                        WHERE id = ?");
-$stmt->execute([$datetime, $_SESSION['namalengkap'], $id]);
+if (empty($_SESSION['username']) && empty($_SESSION['passuser'])) {
+    echo json_encode(array(
+        "status" => "error",
+        "message" => "Sesi login sudah berakhir."
+    ));
+    exit;
+}
 
-$data = array("status"=>"success");
-echo json_encode($data);
+$id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+if ($id <= 0) {
+    echo json_encode(array(
+        "status" => "error",
+        "message" => "ID follow up tidak valid."
+    ));
+    exit;
+}
+
+$datetime = date('Y-m-d H:i:s');
+$followupBy = isset($_SESSION['namalengkap']) && $_SESSION['namalengkap'] !== '' ? $_SESSION['namalengkap'] : 'System';
+
+try {
+    $stmt = $db->prepare("UPDATE riwayat_pelanggan 
+                            SET tgl_followup = ?,
+                                followup_by = ?
+                            WHERE id = ?");
+    $stmt->execute(array($datetime, $followupBy, $id));
+
+    echo json_encode(array(
+        "status" => "success",
+        "message" => "Follow up berhasil disimpan.",
+        "tgl_followup" => $datetime,
+        "followup_by" => $followupBy
+    ));
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(array(
+        "status" => "error",
+        "message" => "Gagal menyimpan follow up: " . $e->getMessage()
+    ));
+}
 ?>

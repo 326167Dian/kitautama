@@ -363,7 +363,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 				$edit_link = "?module=pelanggan&act=edit_riwayat&id=$_GET[id]&idr=".$rw['id'];
 				$delete_link = $aksi."?module=pelanggan&act=hapus_riwayat&id=".$rw['id']."&token=".$token;
 				$obat_tindakan = isset($obat_map[$rw['id']]) ? implode("<br>", $obat_map[$rw['id']]) : htmlspecialchars($rw['tindakan']);
-				$tgl_followup = (isset($rw['tgl_followup']))? $rw['tgl_followup']:'<button type="button" data-id="'.$rw['id'].'" class="tgl_followup btn btn-danger">Klik untuk followup</button>';
+				$has_tgl_followup = isset($rw['tgl_followup']) && $rw['tgl_followup'] !== '' && $rw['tgl_followup'] !== '0000-00-00 00:00:00';
+				$tgl_followup = $has_tgl_followup
+					? htmlspecialchars((string)$rw['tgl_followup'])
+					: '<button type="button" data-id="'.$rw['id'].'" class="btn btn-danger btn-followup">Klik untuk follow up</button>';
 				$followup_by = isset($rw['followup_by']) && $rw['followup_by'] !== '' ? htmlspecialchars((string)$rw['followup_by']) : '-';
 				echo "<tr>
 					<td>$no</td>
@@ -1254,23 +1257,40 @@ $(document).ready(function() {
 
 // 	bindObatAutocomplete('body');
 
-    $(document).on('click', '.tgl_followup', function() {
+	$(document).on('click', '.btn-followup', function() {
 
-        var id = $(this).data('id');
-        $.ajax({
-            url: "modul/mod_pelanggan/updateFollowUp.php",
-            type: "POST",
-            dataType: "json",
-            data:{
-                id: id
-            },
-            success:function(data){
-                if(data.status === 'success'){
-                    window.location.reload();
-                }
-            }
-        });
-    });
+		var $button = $(this);
+		var id = $button.data('id');
+
+		if (!id) {
+			alert('ID follow up tidak ditemukan.');
+			return;
+		}
+
+		$button.prop('disabled', true).text('Menyimpan...');
+
+		$.ajax({
+			url: "modul/mod_pelanggan/updateFollowUp.php",
+			type: "POST",
+			dataType: "json",
+			data:{
+				id: id
+			},
+			success:function(data){
+				if(data && data.status === 'success'){
+					window.location.reload();
+					return;
+				}
+
+				$button.prop('disabled', false).text('Klik untuk follow up');
+				alert(data && data.message ? data.message : 'Gagal menyimpan follow up.');
+			},
+			error:function(xhr){
+				$button.prop('disabled', false).text('Klik untuk follow up');
+				alert('Gagal menghubungi server follow up.');
+			}
+		});
+	});
     
     
 });
