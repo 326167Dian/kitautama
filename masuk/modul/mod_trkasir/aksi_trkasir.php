@@ -311,7 +311,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             $stmt_del_karstok->execute([$kd_trkasir]);
 
             $module2 = $_GET['module2'];
-			echo "<script type='text/javascript'>alert('Data berhasil dihapus !');window.location='../../media_admin.php?module=" . $module2 . "'</script>";
+			echo "<script type='text/javascript'>alert('Data berhasil dihapus !');window.location='../../media_admin.php?module=" . $module . "'</script>";
 		}
 	}
 }

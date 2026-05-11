@@ -1869,6 +1869,25 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             }
         })
     })
+    
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'F1' || event.keyCode === 112) {
+            event.preventDefault(); // Mencegah help browser muncul
+            simpan_detail();
+        }
+        
+        if (event.key === 'F2' || event.keyCode === 113) {
+            event.preventDefault(); // Mencegah help browser muncul
+            $('#dp_bayar').focus();
+        }
+        
+        if (event.key === 'F3' || event.keyCode === 114) {
+            event.preventDefault(); // Mencegah help browser muncul
+            // simpan_detail();
+            simpan_transaksi();
+        }
+    });
+
 </script>
 
 <script src="assets/js/html5-qrcode.min.js" type="text/javascript"></script>
@@ -2908,37 +2927,38 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     }
     
     // F-Key shortcuts dengan priority tinggi
-    window.onkeydown = function(event) {
-        var keyCode = event.keyCode || event.which;
+    // window.onkeydown = function(event) {
+    //     var keyCode = event.keyCode || event.which;
         
-        if (keyCode === 112) { // F1
-            event.preventDefault();
-            event.stopPropagation();
-            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-            simpan_detail();
-            return false;
-        }
-        else if (keyCode === 113) { // F2
-            event.preventDefault();
-            event.stopPropagation();
-            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-            $('#dp_bayar').focus();
-            return false;
-        }
-        else if (keyCode === 114) { // F3
-            event.preventDefault();
-            event.stopPropagation();
-            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-            simpan_transaksi();
-            return false;
-        }
-        else if (keyCode === 115) { // F4
-            event.preventDefault();
-            event.stopPropagation();
-            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-            window.location = '?module=trkasir&act=tambah';
-            return false;
-        }
-    };
-
+    //     if (keyCode === 112) { // F1
+    //         event.preventDefault();
+    //         event.stopPropagation();
+    //         if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    //         simpan_detail();
+    //         return false;
+    //     }
+    //     else if (keyCode === 113) { // F2
+    //         event.preventDefault();
+    //         event.stopPropagation();
+    //         if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    //         $('#dp_bayar').focus();
+    //         return false;
+    //     }
+    //     else if (keyCode === 114) { // F3
+    //         event.preventDefault();
+    //         event.stopPropagation();
+    //         if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    //         simpan_transaksi();
+    //         return false;
+    //     }
+    //     else if (keyCode === 115) { // F4
+    //         event.preventDefault();
+    //         event.stopPropagation();
+    //         if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    //         window.location = '?module=trkasir&act=tambah';
+    //         return false;
+    //     }
+    // };
+    
+    
 </script>

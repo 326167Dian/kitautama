@@ -767,6 +767,318 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 <script>
 var userLevel = '<?= $_SESSION['level']; ?>';
 </script>
+<script>
+(function() {
+	function ensureTambahScannerModal() {
+		if ($('#ModalScanBarcodeBarangForm').length) {
+			return;
+		}
+
+		var modalHtml = '' +
+			'<div id="ModalScanBarcodeBarangForm" class="modal fade" role="dialog" aria-hidden="true">' +
+				'<div class="modal-dialog">' +
+					'<div class="modal-content">' +
+						'<div class="modal-header">' +
+							'<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
+							'<h4 class="modal-title">Scan Barcode Kode Barang</h4>' +
+						'</div>' +
+						'<div class="modal-body">' +
+							'<p id="barcodeScannerStatusBarangForm" style="margin-bottom:8px;color:#666;">Menyiapkan scanner...</p>' +
+							'<div id="barcodeScannerReaderBarangForm" style="width:100%;max-width:100%;"></div>' +
+							'<video id="barcodeScannerPreviewBarangForm" style="width:100%;display:none;border-radius:4px;" muted playsinline></video>' +
+						'</div>' +
+						'<div class="modal-footer">' +
+							'<button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>' +
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</div>';
+
+		$('body').append(modalHtml);
+	}
+
+	function initKodeBarangScanButton() {
+		var params = new URLSearchParams(window.location.search);
+		if (params.get('module') !== 'barang' || params.get('act') !== 'tambah') {
+			return;
+		}
+
+		var $inputKode = $('input[name="kd_barang"]').not('[readonly]').first();
+		if (!$inputKode.length || $('#btnScanBarcodeKodeBarang').length) {
+			return;
+		}
+
+		var $wrapper = $inputKode.closest('.col-sm-8');
+		if (!$wrapper.length) {
+			return;
+		}
+
+		$inputKode.attr('id', 'kd_barang_tambah');
+		$inputKode.css('margin-bottom', '8px');
+
+		var $btn = $('<button>', {
+			type: 'button',
+			id: 'btnScanBarcodeKodeBarang',
+			class: 'btn btn-info btn-sm btn-flat',
+			html: '<i class="fa fa-barcode"></i> Scan Barcode'
+		});
+
+		$wrapper.append($btn);
+		ensureTambahScannerModal();
+	}
+
+	$(document).ready(function() {
+		initKodeBarangScanButton();
+	});
+})();
+</script>
+<script>
+(function() {
+	var scannerStream = null;
+	var scannerInterval = null;
+	var barcodeDetectorInstance = null;
+	var html5QrScanner = null;
+	var html5QrScannerActive = false;
+	var barcodeScanLocked = false;
+	var html5QrScriptPromise = null;
+
+	function setScannerStatus(message, isError) {
+		var statusEl = document.getElementById('barcodeScannerStatusBarangForm');
+		if (!statusEl) {
+			return;
+		}
+		statusEl.innerText = message;
+		statusEl.style.color = isError ? '#b90000' : '#666';
+	}
+
+	function stopBarcodeScanner() {
+		barcodeScanLocked = false;
+
+		if (scannerInterval) {
+			clearInterval(scannerInterval);
+			scannerInterval = null;
+		}
+
+		if (html5QrScanner && html5QrScannerActive) {
+			try {
+				html5QrScanner.stop().then(function() {
+					html5QrScanner.clear();
+				}).catch(function() {
+					try {
+						html5QrScanner.clear();
+					} catch (e) {}
+				});
+			} catch (e) {}
+		}
+
+		html5QrScannerActive = false;
+		html5QrScanner = null;
+
+		if (scannerStream) {
+			scannerStream.getTracks().forEach(function(track) {
+				track.stop();
+			});
+			scannerStream = null;
+		}
+
+		var video = document.getElementById('barcodeScannerPreviewBarangForm');
+		if (video) {
+			video.srcObject = null;
+			video.style.display = 'none';
+		}
+
+		var reader = document.getElementById('barcodeScannerReaderBarangForm');
+		if (reader) {
+			reader.style.display = 'block';
+		}
+	}
+
+	function applyBarcodeResultToKodeBarang(hasilScan) {
+		var cleanValue = $.trim(hasilScan || '');
+		if (!cleanValue) {
+			return;
+		}
+
+		var $input = $('#kd_barang_tambah');
+		if ($input.length) {
+			$input.val(cleanValue).trigger('input').trigger('change');
+			$input.focus();
+		}
+
+		setScannerStatus('Barcode terdeteksi: ' + cleanValue, false);
+		$('#ModalScanBarcodeBarangForm').modal('hide');
+	}
+
+	function loadHtml5QrcodeScript() {
+		if (window.Html5Qrcode) {
+			return Promise.resolve();
+		}
+
+		if (html5QrScriptPromise) {
+			return html5QrScriptPromise;
+		}
+
+		html5QrScriptPromise = new Promise(function(resolve, reject) {
+			var script = document.createElement('script');
+			script.src = 'assets/js/html5-qrcode.min.js';
+			script.async = true;
+			script.onload = function() {
+				resolve();
+			};
+			script.onerror = function() {
+				reject(new Error('Gagal memuat html5-qrcode'));
+			};
+			document.head.appendChild(script);
+		});
+
+		return html5QrScriptPromise;
+	}
+
+	async function startHtml5QrcodeScanner() {
+		if (!window.Html5Qrcode) {
+			throw new Error('html5-qrcode belum tersedia');
+		}
+
+		var video = document.getElementById('barcodeScannerPreviewBarangForm');
+		var reader = document.getElementById('barcodeScannerReaderBarangForm');
+		if (video) {
+			video.style.display = 'none';
+		}
+		if (reader) {
+			reader.style.display = 'block';
+		}
+
+		html5QrScanner = new Html5Qrcode('barcodeScannerReaderBarangForm');
+		var config = {
+			fps: 10,
+			qrbox: {
+				width: 260,
+				height: 120
+			},
+			aspectRatio: 1.7778,
+			formatsToSupport: [
+				Html5QrcodeSupportedFormats.CODE_128,
+				Html5QrcodeSupportedFormats.EAN_13,
+				Html5QrcodeSupportedFormats.EAN_8,
+				Html5QrcodeSupportedFormats.UPC_A,
+				Html5QrcodeSupportedFormats.UPC_E,
+				Html5QrcodeSupportedFormats.CODABAR,
+				Html5QrcodeSupportedFormats.CODE_39,
+				Html5QrcodeSupportedFormats.CODE_93,
+				Html5QrcodeSupportedFormats.ITF,
+				Html5QrcodeSupportedFormats.QR_CODE
+			],
+			experimentalFeatures: {
+				useBarCodeDetectorIfSupported: true
+			}
+		};
+
+		await html5QrScanner.start({
+			facingMode: {
+				ideal: 'environment'
+			}
+		}, config, function(decodedText) {
+			if (barcodeScanLocked) {
+				return;
+			}
+
+			barcodeScanLocked = true;
+			applyBarcodeResultToKodeBarang(decodedText);
+		}, function() {
+			// ignore per-frame decode error
+		});
+
+		html5QrScannerActive = true;
+		setScannerStatus('Scanner aktif. Arahkan barcode ke area kamera.', false);
+	}
+
+	async function startBarcodeDetectorScanner() {
+		if (!window.BarcodeDetector) {
+			throw new Error('Browser tidak support BarcodeDetector.');
+		}
+
+		var video = document.getElementById('barcodeScannerPreviewBarangForm');
+		var reader = document.getElementById('barcodeScannerReaderBarangForm');
+		if (reader) {
+			reader.style.display = 'none';
+		}
+		if (video) {
+			video.style.display = 'block';
+		}
+
+		barcodeDetectorInstance = new BarcodeDetector({
+			formats: ['code_128', 'ean_13', 'ean_8', 'qr_code']
+		});
+
+		scannerStream = await navigator.mediaDevices.getUserMedia({
+			video: {
+				facingMode: {
+					ideal: 'environment'
+				},
+				width: {
+					ideal: 720
+				},
+				height: {
+					ideal: 1280
+				}
+			}
+		});
+
+		video.srcObject = scannerStream;
+		await video.play();
+
+		scannerInterval = setInterval(async function() {
+			if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) {
+				return;
+			}
+
+			try {
+				var detected = await barcodeDetectorInstance.detect(video);
+				if (detected.length > 0 && !barcodeScanLocked) {
+					barcodeScanLocked = true;
+					clearInterval(scannerInterval);
+					scannerInterval = null;
+					applyBarcodeResultToKodeBarang(detected[0].rawValue);
+				}
+			} catch (err) {
+				console.log('scan error', err);
+			}
+		}, 600);
+
+		setScannerStatus('Scanner aktif. Arahkan barcode ke area kamera.', false);
+	}
+
+	async function startBarcodeScanner() {
+		stopBarcodeScanner();
+		setScannerStatus('Menyiapkan scanner kamera...', false);
+
+		try {
+			await loadHtml5QrcodeScript();
+			await startHtml5QrcodeScanner();
+		} catch (err) {
+			try {
+				setScannerStatus('Fallback ke mode scanner bawaan browser...', false);
+				await startBarcodeDetectorScanner();
+			} catch (fallbackErr) {
+				setScannerStatus('Scanner tidak dapat dijalankan di browser ini.', true);
+			}
+		}
+	}
+
+	$(document).on('click', '#btnScanBarcodeKodeBarang', function(e) {
+		e.preventDefault();
+		$('#ModalScanBarcodeBarangForm').modal('show');
+	});
+
+	$(document).on('shown.bs.modal', '#ModalScanBarcodeBarangForm', function() {
+		startBarcodeScanner();
+	});
+
+	$(document).on('hidden.bs.modal', '#ModalScanBarcodeBarangForm', function() {
+		stopBarcodeScanner();
+	});
+})();
+</script>
 <?php
 $barang_table_config_path = __DIR__ . '/barang_table_config.js';
 $barang_table_config_ver = file_exists($barang_table_config_path) ? filemtime($barang_table_config_path) : time();
