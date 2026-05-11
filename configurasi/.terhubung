@@ -1,11 +1,11 @@
 <?php
-
+Date_Default_timezone_set('Asia/jakarta');
 class Database
 {
     private $host = "localhost";
-    private $db_name = "sugu";
-    private $username = "root";
-    private $password = "";
+    private $db_name = "u725913413_sugu";
+    private $username = "u725913413_ikmal";
+    private $password = "7390091979Dian&&";
     private $conn;
 
     public function connect()

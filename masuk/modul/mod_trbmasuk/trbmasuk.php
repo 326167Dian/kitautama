@@ -287,15 +287,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 									
 									<label class='col-sm-4 control-label'>Nama Barang</label>        		
 										<div class='col-sm-7'>
-											<div class='btn-group btn-group-justified' role='group' aria-label='...'>
-                                                <div class='btn-group' role='group'>
-											        <input type=text name='nmbrg_dtrbmasuk' id='nmbrg_dtrbmasuk' class='typeahead form-control' autocomplete='off'>
-                                                    
-                                                </div>
-                                                <div class='btn-group' role='group'>
-                                                    <button type='button' class='btn btn-primary' id='nmbrg_dtrbmasuk_enter'>Enter</button>
-                                                </div>
-                                            </div>
+											<input type=text name='nmbrg_dtrbmasuk' id='nmbrg_dtrbmasuk' class='typeahead form-control' autocomplete='off'>
 										</div>
 										
 									<label class='col-sm-4 control-label'>Qty</label>        		
@@ -872,11 +864,36 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 			return $.post('modul/mod_trbmasuk/autonamabarang.php', {
 				query: query
 			}, function(data) {
-
 				data = $.parseJSON(data);
 				return process(data);
-
 			});
+		},
+		updater: function(item) {
+			// Strip suffix " ( X satuan )" untuk mendapatkan nama asli
+			var nm_barang_clean = item.replace(/\s*\(\s*\d+\s+\S+\s*\)\s*$/, '').trim();
+			$.ajax({
+				url: 'modul/mod_trbmasuk/autonamabarang_enter.php',
+				type: 'post',
+				data: { 'nm_barang': nm_barang_clean }
+			}).success(function(response) {
+				var data = $.parseJSON(response);
+				var qty_default = '1';
+				for (var i = 0; i < data.length; i++) {
+					data = data[i];
+					document.getElementById('id_barang').value = data.id_barang;
+					document.getElementById('kd_barang').value = data.kd_barang;
+					document.getElementById('nmbrg_dtrbmasuk').value = data.nm_barang;
+					document.getElementById('stok_barang').value = data.stok_barang;
+					document.getElementById('qty_dtrbmasuk').value = qty_default;
+					document.getElementById('sat_dtrbmasuk').value = data.sat_barang;
+					document.getElementById('hrgsat_dtrbmasuk').value = data.hrgsat_barang;
+					document.getElementById('hrgjual_dtrbmasuk').value = data.hrgjual_barang;
+					document.getElementById('hrgjual_dtrbmasuk_resep').value = data.hrgjual_barang1;
+					document.getElementById('hrgjual_dtrbmasuk_nakes').value = data.hrgjual_barang2;
+				}
+				closeAutocompleteSuggestions('#nmbrg_dtrbmasuk');
+			});
+			return nm_barang_clean;
 		}
 	});
 	
