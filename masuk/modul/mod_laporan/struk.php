@@ -1,22 +1,56 @@
 <?php
+ob_start();
 include "../../../configurasi/koneksi.php";
 require('../../assets/pdf/fpdf.php');
 include "../../../configurasi/fungsi_indotgl.php";
 include "../../../configurasi/fungsi_rupiah.php";
 
+$kd_trkasir = isset($_GET['kd_trkasir']) ? $_GET['kd_trkasir'] : '';
+
 //ambil header
 $ah = $db->prepare("SELECT * FROM setheader");
 $ah->execute();
 $rh = $ah->fetch(PDO::FETCH_ASSOC);
+if (!$rh) {
+    $rh = [
+        'satu' => '',
+        'dua' => '',
+        'tiga' => '',
+        'empat' => '',
+        'lima' => '',
+        'enam' => '',
+        'delapan' => '',
+        'sembilan' => '',
+        'sepuluh' => '',
+        'sebelas' => ''
+    ];
+}
 
 $dt = $db->prepare("SELECT * FROM trkasir
                     JOIN carabayar ON trkasir.id_carabayar = carabayar.id_carabayar
-                    WHERE trkasir.kd_trkasir='$_GET[kd_trkasir]'");
-$dt->execute();
+                    WHERE trkasir.kd_trkasir=?");
+$dt->execute([$kd_trkasir]);
 $r1 = $dt->fetch(PDO::FETCH_ASSOC);
+if (!$r1) {
+    $r1 = [
+        'kd_trkasir' => $kd_trkasir,
+        'tgl_trkasir' => date('Y-m-d'),
+        'nm_pelanggan' => '',
+        'tlp_pelanggan' => '',
+        'nm_carabayar' => '',
+        'ttl_trkasir' => 0,
+        'dp_bayar' => 0,
+        'sisa_bayar' => 0,
+        'id_pelanggan' => 0,
+        'poin_awal' => 0,
+        'tambahan_poin' => 0,
+        'redeem_poin' => 0,
+        'petugas' => ''
+    ];
+}
 
-$jumlah = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir='$_GET[kd_trkasir]'");
-$jumlah->execute();
+$jumlah = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir=?");
+$jumlah->execute([$kd_trkasir]);
 $jumlahdetail = $jumlah->rowCount();
 
 $ukuran1 = 20.7; //setingan kertas
@@ -109,9 +143,10 @@ $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
 
 $no = 1;
-$query = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir='$_GET[kd_trkasir]'
+
+$query = $db->prepare("SELECT * FROM trkasir_detail WHERE kd_trkasir=?
 	                    ORDER BY id_dtrkasir ASC");
-$query->execute();
+$query->execute([$kd_trkasir]);
 
 $st = [];
 $totalresep = 0;
@@ -198,6 +233,7 @@ $stmt_pelanggan->execute([
     ':id_pelanggan' => $r1['id_pelanggan']
 ]);
 $poin = $stmt_pelanggan->fetch(PDO::FETCH_ASSOC);
+$total_poin = ($poin && isset($poin['total_poin'])) ? $poin['total_poin'] : 0;
 
 $pdf->ln(0.4);
 $pdf->SetX(0.2);
@@ -218,7 +254,7 @@ $pdf->Cell(2.7, 0.4, format_rupiah($r1['redeem_poin']*-1), 0, 1, 'R');
 $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
 $pdf->Cell(2, 0.4, 'Sisa Poin : ', 0, 0, 'L');
-$pdf->Cell(2.7, 0.4, format_rupiah($poin['total_poin']), 0, 1, 'R');
+$pdf->Cell(2.7, 0.4, format_rupiah($total_poin), 0, 1, 'R');
 
 // $pdf->ln(0.1);
 // $pdf->SetX(0.6);
@@ -236,4 +272,7 @@ $pdf->Cell(4.6, 0.3, $rh['sepuluh'], 0, 1, 'C');
 $pdf->Cell(4.6, 0.3, $rh['sebelas'], 0, 1, 'C');
 $pdf->Cell(4.6, 0.3, "Kasir : " . $r1['petugas'], 0, 1, 'C');
 
+if (ob_get_length()) {
+    ob_end_clean();
+}
 $pdf->Output("struk_wallpaper", "I");

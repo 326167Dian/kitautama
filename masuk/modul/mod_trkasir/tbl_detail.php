@@ -169,15 +169,7 @@ color: white;
 								<div class='text-right'>
 									<label class='col-sm-6 control-label'>JUMLAH BAYAR</label>        		
 									 <div class='col-sm-6'>
-										<div class='btn-group btn-group-justified' role='group' aria-label='...'>
-                                          <div class='btn-group' role='group'>
-                                            <input type='text' name='dp_bayar' id='dp_bayar' value='' class='form-control'  style='font-size: 18px; color: #000000; font-weight: bold; text-align: right;' autocomplete='off'>
-									    
-                                          </div>
-                                          <div class='btn-group' role='group'>
-                                            <button type='button' class='btn btn-primary' id='dp_bayar_enter'>Enter</button>
-                                          </div>
-                                        </div>
+										<input type='text' name='dp_bayar' id='dp_bayar' value='' class='form-control'  style='font-size: 18px; color: #000000; font-weight: bold; text-align: right;' autocomplete='off'>
 									 </div>	 
 								</div>
 													
@@ -243,24 +235,32 @@ $(document).ready(function () {
 
 		
 		
-		//hitung dp
+		function validasiJumlahBayar() {
+		    var ttl_trkasir = document.getElementById('ttl_trkasir').value;
+		    ttl_trkasir = ttl_trkasir.replace(/\./g, "");
+		    ttl_trkasir = parseInt(ttl_trkasir || 0, 10);
+
+		    var dp_bayar = document.getElementById('dp_bayar').value;
+		    dp_bayar = dp_bayar.replace(/\./g, "");
+		    dp_bayar = parseInt(dp_bayar || 0, 10);
+
+		    if (dp_bayar < ttl_trkasir) {
+		        alert(' Jumlah bayar lebih kecil dari Total Bayar..');
+		    }
+		}
+
+		// hitung otomatis saat mengetik jumlah bayar
+		$('#dp_bayar').on('input keyup change', function() {
+		    HitungOngkirDanDP();
+		});
+
+		// tetap support Enter untuk validasi
 		$('#dp_bayar').keydown(function(e) {
-    		if (e.which == 13) { // e.which == 13 merupakan kode yang mendeteksi ketika anda   // menekan tombol enter di keyboard
-    			//letakan fungsi anda disini
-    			var ttl_trkasir = document.getElementById('ttl_trkasir').value;
-			    ttl_trkasir = ttl_trkasir.replace(/\./g, "");
-    			ttl_trkasir = parseInt(ttl_trkasir);
-    			
-                var dp_bayar = document.getElementById('dp_bayar').value;
-			    dp_bayar = dp_bayar.replace(/\./g, "");
-			    dp_bayar = parseInt(dp_bayar);
-			    
-			    if(dp_bayar < ttl_trkasir){
-    			    alert(' Jumlah bayar lebih kecil dari Total Bayar..');
-    			}
-    			HitungOngkirDanDP();
-    				
-    		}
+	    		if (e.which == 13) {
+	    			e.preventDefault();
+	    			validasiJumlahBayar();
+	    			HitungOngkirDanDP();
+	    		}
 		});
 		
 		
@@ -275,23 +275,6 @@ $(document).ready(function () {
 		}
 		});
 		
-		//tombol enter dp_bayar_enter
-		$('#dp_bayar_enter').on('click', function(e){
-		    var ttl_trkasir = document.getElementById('ttl_trkasir').value;
-			    ttl_trkasir = ttl_trkasir.replace(/\./g, "");
-    			ttl_trkasir = parseInt(ttl_trkasir);
-    			
-                var dp_bayar = document.getElementById('dp_bayar').value;
-			    dp_bayar = dp_bayar.replace(/\./g, "");
-			    dp_bayar = parseInt(dp_bayar);
-			    
-			    if(dp_bayar < ttl_trkasir){
-    			    alert(' Jumlah bayar lebih kecil dari Total Bayar..');
-    			}
-    			
-		    HitungOngkirDanDP();
-		})
-
 		//hitung diskon
 		$('#diskon2').keydown(function(e) {
 		if (e.which == 13) { // e.which == 13 merupakan kode yang mendeteksi ketika anda   // menekan tombol enter di keyboard
