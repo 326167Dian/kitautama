@@ -76,6 +76,25 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
 					</table>
 
+					<div id="ModalScanBarcodeBarang" class="modal fade" role="dialog" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+									<h4 class="modal-title">Scan Barcode Untuk Search Barang</h4>
+								</div>
+								<div class="modal-body">
+									<div id="barcodeScannerReaderBarang" style="width:100%; min-height:260px; max-height:320px; background:#000;"></div>
+									<video id="barcodeScannerPreviewBarang" autoplay playsinline muted style="display:none; width:100%; max-height:320px; background:#000;"></video>
+									<p id="barcodeScannerStatusBarang" style="margin-top:10px; margin-bottom:0; font-size:12px; color:#666;">Arahkan kamera ke barcode item.</p>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
 					<div id="indikasiModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
 						<div class="modal-dialog modal-fullscreen" role="document">
 							<div class="modal-content">
@@ -173,7 +192,12 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							  <div class='form-group'>
 									<label class='col-sm-4 control-label'>Kode Barang</label>        		
 									 <div class='col-sm-8'>
-										<input type='text' name='kd_barang' class='form-control' autocomplete='off' placeholder='$kode_brg'>
+											<div class='input-group'>
+												<input type='text' id='kd_barang_tambah' name='kd_barang' class='form-control' autocomplete='off' placeholder='$kode_brg'>
+												<span class='input-group-btn'>
+													<button type='button' id='btnScanBarcodeKodeBarang' class='btn btn-info btn-flat' data-toggle='modal' data-target='#ModalScanBarcodeBarangForm'><span class='glyphicon glyphicon-camera'></span> Scan</button>
+												</span>
+											</div>
 									 </div>
 							  </div>
 							  
@@ -767,73 +791,32 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 <script>
 var userLevel = '<?= $_SESSION['level']; ?>';
 </script>
+<?php if (isset($_GET['act']) && $_GET['act'] === 'tambah') { ?>
+<div id="ModalScanBarcodeBarangForm" class="modal fade" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">Scan Barcode Kode Barang</h4>
+			</div>
+			<div class="modal-body">
+				<div id="barcodeScannerReaderBarangForm" style="width:100%; min-height:260px; max-height:320px; background:#000;"></div>
+				<video id="barcodeScannerPreviewBarangForm" autoplay playsinline muted style="display:none; width:100%; max-height:320px; background:#000;"></video>
+				<p id="barcodeScannerStatusBarangForm" style="margin-top:10px; margin-bottom:0; font-size:12px; color:#666;">Arahkan kamera ke barcode item.</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+			</div>
+		</div>
+	</div>
+</div>
+<?php } ?>
 <script>
 (function() {
-	function ensureTambahScannerModal() {
-		if ($('#ModalScanBarcodeBarangForm').length) {
-			return;
-		}
-
-		var modalHtml = '' +
-			'<div id="ModalScanBarcodeBarangForm" class="modal fade" role="dialog" aria-hidden="true">' +
-				'<div class="modal-dialog">' +
-					'<div class="modal-content">' +
-						'<div class="modal-header">' +
-							'<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
-							'<h4 class="modal-title">Scan Barcode Kode Barang</h4>' +
-						'</div>' +
-						'<div class="modal-body">' +
-							'<p id="barcodeScannerStatusBarangForm" style="margin-bottom:8px;color:#666;">Menyiapkan scanner...</p>' +
-							'<div id="barcodeScannerReaderBarangForm" style="width:100%;max-width:100%;"></div>' +
-							'<video id="barcodeScannerPreviewBarangForm" style="width:100%;display:none;border-radius:4px;" muted playsinline></video>' +
-						'</div>' +
-						'<div class="modal-footer">' +
-							'<button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>' +
-						'</div>' +
-					'</div>' +
-				'</div>' +
-			'</div>';
-
-		$('body').append(modalHtml);
+	if (!document.getElementById('ModalScanBarcodeBarangForm')) {
+		return;
 	}
 
-	function initKodeBarangScanButton() {
-		var params = new URLSearchParams(window.location.search);
-		if (params.get('module') !== 'barang' || params.get('act') !== 'tambah') {
-			return;
-		}
-
-		var $inputKode = $('input[name="kd_barang"]').not('[readonly]').first();
-		if (!$inputKode.length || $('#btnScanBarcodeKodeBarang').length) {
-			return;
-		}
-
-		var $wrapper = $inputKode.closest('.col-sm-8');
-		if (!$wrapper.length) {
-			return;
-		}
-
-		$inputKode.attr('id', 'kd_barang_tambah');
-		$inputKode.css('margin-bottom', '8px');
-
-		var $btn = $('<button>', {
-			type: 'button',
-			id: 'btnScanBarcodeKodeBarang',
-			class: 'btn btn-info btn-sm btn-flat',
-			html: '<i class="fa fa-barcode"></i> Scan Barcode'
-		});
-
-		$wrapper.append($btn);
-		ensureTambahScannerModal();
-	}
-
-	$(document).ready(function() {
-		initKodeBarangScanButton();
-	});
-})();
-</script>
-<script>
-(function() {
 	var scannerStream = null;
 	var scannerInterval = null;
 	var barcodeDetectorInstance = null;
@@ -841,6 +824,47 @@ var userLevel = '<?= $_SESSION['level']; ?>';
 	var html5QrScannerActive = false;
 	var barcodeScanLocked = false;
 	var html5QrScriptPromise = null;
+
+	function hasBootstrapModal() {
+		return (typeof $.fn.modal === 'function');
+	}
+
+	function showScannerModal() {
+		var $modal = $('#ModalScanBarcodeBarangForm');
+		if (!$modal.length) {
+			return;
+		}
+
+		if (hasBootstrapModal()) {
+			$modal.modal('show');
+			return;
+		}
+
+		$('body').addClass('modal-open');
+		$modal
+			.css('display', 'block')
+			.addClass('in')
+			.attr('aria-hidden', 'false');
+	}
+
+	function hideScannerModal() {
+		var $modal = $('#ModalScanBarcodeBarangForm');
+		if (!$modal.length) {
+			return;
+		}
+
+		if (hasBootstrapModal()) {
+			$modal.modal('hide');
+			return;
+		}
+
+		$modal
+			.removeClass('in')
+			.css('display', 'none')
+			.attr('aria-hidden', 'true');
+		$('body').removeClass('modal-open');
+		stopBarcodeScanner();
+	}
 
 	function setScannerStatus(message, isError) {
 		var statusEl = document.getElementById('barcodeScannerStatusBarangForm');
@@ -906,7 +930,7 @@ var userLevel = '<?= $_SESSION['level']; ?>';
 		}
 
 		setScannerStatus('Barcode terdeteksi: ' + cleanValue, false);
-		$('#ModalScanBarcodeBarangForm').modal('hide');
+		hideScannerModal();
 	}
 
 	function loadHtml5QrcodeScript() {
@@ -1067,7 +1091,11 @@ var userLevel = '<?= $_SESSION['level']; ?>';
 
 	$(document).on('click', '#btnScanBarcodeKodeBarang', function(e) {
 		e.preventDefault();
-		$('#ModalScanBarcodeBarangForm').modal('show');
+		showScannerModal();
+
+		if (!hasBootstrapModal()) {
+			startBarcodeScanner();
+		}
 	});
 
 	$(document).on('shown.bs.modal', '#ModalScanBarcodeBarangForm', function() {
@@ -1076,6 +1104,14 @@ var userLevel = '<?= $_SESSION['level']; ?>';
 
 	$(document).on('hidden.bs.modal', '#ModalScanBarcodeBarangForm', function() {
 		stopBarcodeScanner();
+	});
+
+	$(document).on('click', '#ModalScanBarcodeBarangForm .close, #ModalScanBarcodeBarangForm [data-dismiss="modal"]', function(e) {
+		if (hasBootstrapModal()) {
+			return;
+		}
+		e.preventDefault();
+		hideScannerModal();
 	});
 })();
 </script>

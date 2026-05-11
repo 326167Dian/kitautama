@@ -1,4 +1,8 @@
 $(document).ready(function() {
+	if (!$('#tes').length) {
+		return;
+	}
+
 	var scannerStream = null;
 	var scannerInterval = null;
 	var barcodeDetectorInstance = null;
@@ -8,32 +12,45 @@ $(document).ready(function() {
 	var scannerMode = null;
 	var html5QrScriptPromise = null;
 
-	function ensureScannerModalExists() {
-		if ($('#ModalScanBarcodeBarang').length) {
+	function hasBootstrapModal() {
+		return (typeof $.fn.modal === 'function');
+	}
+
+	function showScannerModal() {
+		var $modal = $('#ModalScanBarcodeBarang');
+		if (!$modal.length) {
 			return;
 		}
 
-		var modalHtml = '' +
-			'<div id="ModalScanBarcodeBarang" class="modal fade" role="dialog" aria-hidden="true">' +
-				'<div class="modal-dialog">' +
-					'<div class="modal-content">' +
-						'<div class="modal-header">' +
-							'<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
-							'<h4 class="modal-title">Scan Barcode Untuk Search Barang</h4>' +
-						'</div>' +
-						'<div class="modal-body">' +
-							'<p id="barcodeScannerStatusBarang" style="margin-bottom:8px;color:#666;">Menyiapkan scanner...</p>' +
-							'<div id="barcodeScannerReaderBarang" style="width:100%;max-width:100%;"></div>' +
-							'<video id="barcodeScannerPreviewBarang" style="width:100%;display:none;border-radius:4px;" muted playsinline></video>' +
-						'</div>' +
-						'<div class="modal-footer">' +
-							'<button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>' +
-						'</div>' +
-					'</div>' +
-				'</div>' +
-			'</div>';
+		if (hasBootstrapModal()) {
+			$modal.modal('show');
+			return;
+		}
 
-		$('body').append(modalHtml);
+		$('body').addClass('modal-open');
+		$modal
+			.css('display', 'block')
+			.addClass('in')
+			.attr('aria-hidden', 'false');
+	}
+
+	function hideScannerModal() {
+		var $modal = $('#ModalScanBarcodeBarang');
+		if (!$modal.length) {
+			return;
+		}
+
+		if (hasBootstrapModal()) {
+			$modal.modal('hide');
+			return;
+		}
+
+		$modal
+			.removeClass('in')
+			.css('display', 'none')
+			.attr('aria-hidden', 'true');
+		$('body').removeClass('modal-open');
+		stopBarcodeScanner();
 	}
 
 	function setScannerStatus(message, isError) {
@@ -100,7 +117,7 @@ $(document).ready(function() {
 
 		table.search(cleanValue).draw();
 		setScannerStatus('Barcode terdeteksi: ' + cleanValue, false);
-		$('#ModalScanBarcodeBarang').modal('hide');
+		hideScannerModal();
 	}
 
 	function loadHtml5QrcodeScript() {
@@ -375,7 +392,6 @@ $(document).ready(function() {
 		}]
 	});
 
-		ensureScannerModalExists();
 		injectSearchBarcodeButton();
 
 	table.on('draw', function() {
@@ -396,7 +412,11 @@ $(document).ready(function() {
 
 	$(document).on('click', '#btnScanBarcodeSearchBarang', function(e) {
 		e.preventDefault();
-		$('#ModalScanBarcodeBarang').modal('show');
+		showScannerModal();
+
+		if (!hasBootstrapModal()) {
+			startBarcodeScanner();
+		}
 	});
 
 	$('#ModalScanBarcodeBarang').on('shown.bs.modal', function() {
@@ -405,6 +425,14 @@ $(document).ready(function() {
 
 	$('#ModalScanBarcodeBarang').on('hidden.bs.modal', function() {
 		stopBarcodeScanner();
+	});
+
+	$(document).on('click', '#ModalScanBarcodeBarang .close, #ModalScanBarcodeBarang [data-dismiss="modal"]', function(e) {
+		if (hasBootstrapModal()) {
+			return;
+		}
+		e.preventDefault();
+		hideScannerModal();
 	});
 
 	$('#tes tbody').on('click', 'a', function(e) {
