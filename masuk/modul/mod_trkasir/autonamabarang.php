@@ -8,7 +8,9 @@ $stmt->execute(['%'.$key.'%']);
 
 $json = [];
 while($re = $stmt->fetch(PDO::FETCH_ASSOC)){
-    $json[] = $re['nm_barang'];
+    $stok = (int)$re['stok_barang'];
+    $sat  = $re['sat_barang'];
+    $json[] = $re['nm_barang'] . ' ( ' . $stok . ' ' . $sat . ' )';
 }
 
 $stmtbundle = $db->prepare("SELECT * FROM bundle WHERE nm_bundle LIKE ?");

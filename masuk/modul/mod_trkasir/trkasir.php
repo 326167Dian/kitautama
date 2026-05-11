@@ -2330,13 +2330,15 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         },
         updater: function(item) {
             let jns_transaksi = $('select[name="jns_transaksi"]').val();
+            // strip suffix " ( X satuan )" yang ditambahkan untuk tampilan dropdown
+            let nm_barang_clean = item.replace(/\s*\(\s*\d+\s+\S+\s*\)\s*$/, '').trim();
 
             $.ajax({
                 url: 'modul/mod_trkasir/autonamabarang_enter.php',
                 type: 'post',
                 dataType: 'json',
                 data: {
-                    'nm_barang': item
+                    'nm_barang': nm_barang_clean
                 },
             }).done(function(data) {
                 let qty_default = "1";
