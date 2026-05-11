@@ -620,15 +620,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 										</div>
 									
 										
-									<label class='col-sm-4 control-label'>Telepon</label>        		
-										<div class='col-sm-6'>
-											<input type=text name='tlp_pelanggan' id='tlp_pelanggan' class='form-control' autocomplete='off' readonly>
-										</div>
-										
-									<label class='col-sm-4 control-label'>Alamat</label>        		
-										<div class='col-sm-6'>
-											<textarea name='alamat_pelanggan' id='alamat_pelanggan' class='form-control' rows='2' readonly></textarea>
-										</div>
+									<input type='hidden' name='tlp_pelanggan' id='tlp_pelanggan'>
+									<input type='hidden' name='alamat_pelanggan' id='alamat_pelanggan'>
 										
 									<label class='col-sm-4 control-label'>Nama Dokter</label>        		
 										<div class='col-sm-6'>
