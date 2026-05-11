@@ -244,108 +244,45 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                         
                             ?>                            
                     </table>
-                    <table class="table table-striped table-bordered table-responsive">
                     <h4>Ringkasan Transaksi</h4>
-                                <thead>
+                    <table class="table table-striped table-bordered table-responsive">
+                        <thead>
+                            <tr>
                                 <th width="150px">Tipe Transaksi</th>
                                 <th>Nilai Transaksi</th>
                                 <th>Shift Pagi</th>
                                 <th>Shift Sore</th>
-                                </thead>
-                                <tbody>
-                                <?php
-                                $tgl_awal = date('Y-m-d');
-                                $tamtot = $db->query("select * from carabayar");
-                                while ($tt = $tamtot->fetch(PDO::FETCH_ASSOC)){
-
-                                    $tcb= $db->prepare( "SELECT id_trkasir, kd_trkasir, SUM(ttl_trkasir) as ttlskrg1
-                                        FROM trkasir WHERE tgl_trkasir='$tgl_awal' AND id_carabayar='$tt[id_carabayar]'");
-                                    $tcb->execute();
-                                    $tamtcb = $tcb->fetch(PDO::FETCH_ASSOC);
-                                    $dtamtcb = format_rupiah($tamtcb['ttlskrg1']);
-
-                                    $shift1= $db->prepare( "SELECT id_trkasir, kd_trkasir, SUM(ttl_trkasir) as ttlskrg1
-                                        FROM trkasir WHERE tgl_trkasir='$tgl_awal' AND id_carabayar='$tt[id_carabayar]' and shift=1 ");
-                                    $shift1->execute();
-                                    $pagi1 = $shift1->fetch(PDO::FETCH_ASSOC);
-                                    $pagi = format_rupiah($pagi1['ttlskrg1']);
-
-                                    $shift2= $db->prepare( "SELECT id_trkasir, kd_trkasir, SUM(ttl_trkasir) as ttlskrg1
-                                        FROM trkasir WHERE tgl_trkasir='$tgl_awal' AND id_carabayar='$tt[id_carabayar]' and shift=2 ");
-                                    $shift2->execute();
-                                    $sore1 = $shift2->fetch(PDO::FETCH_ASSOC);
-                                    $sore = format_rupiah($sore1['ttlskrg1']);
-
-                                    echo"
-                          <tr><td width='150 px'>$tt[nm_carabayar]</td>
-                                <td>$dtamtcb</td>
-                                <td>$pagi</td>
-                                <td>$sore</td>
-                          </tr>
-                          ";
-                                }
-                                ?>
-                                </tbody>
-                                <tfoot>
-                                <?php
-                                $tgl_awal = date('Y-m-d');
-                                $tothari = $db->prepare("SELECT id_trkasir, kd_trkasir, SUM(ttl_trkasir) as ttlskrg4                                                               FROM trkasir WHERE tgl_trkasir='$tgl_awal'");
-                                $tothari->execute();
-                                $arth = $tothari->fetch(PDO::FETCH_ASSOC);
-                                $tdm = format_rupiah($arth['ttlskrg4']);
-
-                                $totpagi = $db->prepare("SELECT id_trkasir, kd_trkasir, SUM(ttl_trkasir) as ttlskrg4                                                             FROM trkasir WHERE tgl_trkasir='$tgl_awal' and shift=1 ");
-                                $totpagi->execute();
-                                $tpagi = $totpagi->fetch(PDO::FETCH_ASSOC);
-                                $shiftpagi = format_rupiah($tpagi['ttlskrg4']);
-
-                                $totsore = $db->prepare("SELECT id_trkasir, kd_trkasir, SUM(ttl_trkasir) as ttlskrg4                                                               FROM trkasir WHERE tgl_trkasir='$tgl_awal' and shift=2 ");
-                                $totsore->execute();
-                                $tsore = $totsore->fetch(PDO::FETCH_ASSOC);
-                                $shiftsore = format_rupiah($tsore['ttlskrg4']);
-
-                                echo"
-                            <tr style='background-color: #00fafa;font-size:20px;font-weight:bold;'>
-                                <td>TOTAL</td>                               
-                                <td>$tdm</td>
-                                <td>$shiftpagi</td>
-                                <td>$shiftsore</td>
-                            </tr>";
-                                ?>
-                               </tfoot>
-                            </table>
-                    
-                    <!-- <table class="table table-striped table-bordered table-responsive">
-                        <h4>Ringkasan Transaksi</h4>
-                        <thead>
-                            <th width="150px">Tipe Transaksi</th>
-                            <th>Nilai Transaksi</th>
-                            <th>Shift Pagi</th>
-                            <th>Shift Sore</th>
+                            </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td width='150 px'>Tunai</td>
-                                <td><div id="totalTunai"></div></td>
-                                <td><div id="totalTunaiPagi"></div></td>
-                                <td><div id="totalTunaiSore"></div></td>
+                                <td><div id="totalTunai">0</div></td>
+                                <td><div id="totalTunaiPagi">0</div></td>
+                                <td><div id="totalTunaiSore">0</div></td>
                             </tr>
                             <tr>
                                 <td width='150 px'>Transfer</td>
-                                <td><div id="totalTransfer"></div></td>
-                                <td><div id="totalTransferPagi"></div></td>
-                                <td><div id="totalTransferSore"></div></td>
+                                <td><div id="totalTransfer">0</div></td>
+                                <td><div id="totalTransferPagi">0</div></td>
+                                <td><div id="totalTransferSore">0</div></td>
+                            </tr>
+                            <tr>
+                                <td width='150 px'>Tempo</td>
+                                <td><div id="totalTempo">0</div></td>
+                                <td><div id="totalTempoPagi">0</div></td>
+                                <td><div id="totalTempoSore">0</div></td>
                             </tr>
                         </tbody>
                         <tfoot>
                             <tr style='background-color: #00fafa;font-size:20px;font-weight:bold;'>
                                 <td>TOTAL</td>
-                                <td><div id="totalKasir"></div></td>
-                                <td><div id="totalKasirPagi"></div></td>
-                                <td><div id="totalKasirSore"></div></td>
+                                <td><div id="totalKasir">0</div></td>
+                                <td><div id="totalKasirPagi">0</div></td>
+                                <td><div id="totalKasirSore">0</div></td>
                             </tr>
                         </tfoot>
-                    </table>         -->
+                    </table>
                 </div>
                 <?php
                 $kom = $db->prepare("SELECT sum(komisi) AS tambahan FROM trkasir_detail JOIN trkasir
@@ -479,10 +416,14 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                             $('#totalTransfer').html(formatRupiah(json.totalTransfer));
                             $('#totalTransferPagi').html(formatRupiah(json.totalTransferPagi));
                             $('#totalTransferSore').html(formatRupiah(json.totalTransferSore));
+
+                            $('#totalTempo').html(formatRupiah(json.totalTempo));
+                            $('#totalTempoPagi').html(formatRupiah(json.totalTempoPagi));
+                            $('#totalTempoSore').html(formatRupiah(json.totalTempoSore));
                             
-                            $('#totalKasir').html(formatRupiah(json.totalTunai + json.totalTransfer));
-                            $('#totalKasirPagi').html(formatRupiah(json.totalTunaiPagi + json.totalTransferPagi));
-                            $('#totalKasirSore').html(formatRupiah(json.totalTunaiSore + json.totalTransferSore));
+                            $('#totalKasir').html(formatRupiah(json.totalKasir));
+                            $('#totalKasirPagi').html(formatRupiah(json.totalTunaiPagi + json.totalTransferPagi + json.totalTempoPagi));
+                            $('#totalKasirSore').html(formatRupiah(json.totalTunaiSore + json.totalTransferSore + json.totalTempoSore));
                         }
                     })
 
