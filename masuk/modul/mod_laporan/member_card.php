@@ -39,7 +39,6 @@ $pdf->AddPage();
 $pdf->Line(0.2, 2.9, 4.8, 2.9); //horisontal bawah
 
 $pdf->Line(0.2, 4.9, 4.8, 4.9); //judul tabel atas
-// $pdf->Line(0.2, 5.5, 4.8, 5.5); //judul tabel atas
 
 $text = substr($rh['satu'], 7,);
 
@@ -147,8 +146,6 @@ if ($adaResep) {
     $pdf->Cell(1, 0.4, '', 0, 0, 'C');
     $pdf->Cell(1, 0.4, format_rupiah($totalresep), 0, 0, 'R');
     $pdf->Cell(1.5, 0.4, format_rupiah($totalresep), 0, 1, 'R');
-    
-    $currentX += 0.6;
 }
 
 $gt = array_sum($st);
@@ -191,7 +188,7 @@ $pdf->Cell(3.5, 0.4, 'Kembalian : ', 0, 0, 'R');
 $pdf->Cell(1.2, 0.4, format_rupiah($r1['sisa_bayar']), 0, 1, 'R');
 
 $nowX = $currentX + 2.4;
-$pdf->Line(0.2, $nowX, 4.8, $nowX); 
+$pdf->Line(0.2, $nowX, 4.8, $nowX); //judul tabel atas
 
 $stmt_pelanggan = $db->prepare("SELECT * FROM pelanggan WHERE id_pelanggan = :id_pelanggan");
 $stmt_pelanggan->execute([
@@ -202,23 +199,18 @@ $poin = $stmt_pelanggan->fetch(PDO::FETCH_ASSOC);
 $pdf->ln(0.4);
 $pdf->SetX(0.2);
 $pdf->SetFont('Arial', 'B', 8);
-$pdf->Cell(2, 0.4, 'Poin Awal : ', 0, 0, 'L');
-$pdf->Cell(2.7, 0.4, format_rupiah($r1['poin_awal']), 0, 1, 'R');
-
-$pdf->SetX(0.2);
-$pdf->SetFont('Arial', 'B', 8);
-$pdf->Cell(2, 0.4, 'Tambahan Poin : ', 0, 0, 'L');
-$pdf->Cell(2.7, 0.4, format_rupiah($r1['tambahan_poin']), 0, 1, 'R');
-
-$pdf->SetX(0.2);
-$pdf->SetFont('Arial', 'B', 8);
-$pdf->Cell(2, 0.4, 'Redeem Poin : ', 0, 0, 'L');
-$pdf->Cell(2.7, 0.4, format_rupiah($r1['redeem_poin']*-1), 0, 1, 'R');
-
-$pdf->SetX(0.2);
-$pdf->SetFont('Arial', 'B', 8);
-$pdf->Cell(2, 0.4, 'Sisa Poin : ', 0, 0, 'L');
+$pdf->Cell(2, 0.4, 'Total Poin Anda : ', 0, 0, 'L');
 $pdf->Cell(2.7, 0.4, format_rupiah($poin['total_poin']), 0, 1, 'R');
+
+$pdf->SetX(0.2);
+$pdf->SetFont('Arial', 'B', 8);
+$pdf->Cell(2, 0.4, 'Poin Didapatkan : ', 0, 0, 'L');
+$pdf->Cell(2.7, 0.4, format_rupiah($r1['get_poin']), 0, 1, 'R');
+
+$pdf->SetX(0.2);
+$pdf->SetFont('Arial', 'B', 8);
+$pdf->Cell(2, 0.4, 'Poin Digunakan : ', 0, 0, 'L');
+$pdf->Cell(2.7, 0.4, format_rupiah($r1['used_poin']), 0, 1, 'R');
 
 // $pdf->ln(0.1);
 // $pdf->SetX(0.6);

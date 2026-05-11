@@ -434,7 +434,19 @@
             		    var exp_date            = $(this).val();
             		    var kd_orders           = $('#kd_trbmasuk').val();
             		    var kd_trbmasuk         = $('#kd_trbmasuk1').val();
-            		    		
+            		    var tgl_trbmasuk = document.getElementById('tgl_trbmasuk').value;
+            		    var min_exp_date = document.getElementById('min_exp_date').value;
+        
+                        const tglAwal = new Date(tgl_trbmasuk);
+                        const tglAkhir = new Date(exp_date);
+                        const selisih = hitungSelisihBulan(tglAwal, tglAkhir);
+                        console.log(selisih);
+                        if(parseInt(selisih) < parseInt(min_exp_date)){
+                            alert('Minimum Expired Date '+min_exp_date+' Hari dari Hari Ini!');
+                            tabel_detail1();
+                            return false;
+                        }
+            
                         $.ajax({
                             url: 'modul/mod_trbmasukpbf/simpandetail_expdate.php',
                             type: 'post',

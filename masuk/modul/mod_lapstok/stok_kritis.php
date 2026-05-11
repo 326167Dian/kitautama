@@ -112,7 +112,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     			</div>
     			
     			<a class='btn  btn-danger btn-flat' href='modul/mod_laporan/cetak_stokkritis.php' target='_blank' style="margin-bottom: 10px">EXPORT TO EXCEL</a>
-                <button class='btn  btn-success btn-flat' type='submit' id="btn_order" style="margin-bottom: 10px">ADD TO ORDER</button>
+                <button class='btn btn-success btn-flat' type='submit' id="btn_order" style="margin-bottom: 10px">ADD TO ORDER</button>
                 <hr>
     				    
                 <table id="example1" class="table table-bordered table-striped table-responsive">
@@ -147,11 +147,12 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                                 $qfc = $tp30['t30'] - $tp30['stok_barang'];
                                 $qweek = round((($tp30['q30']-$tp30['stok_barang'])/4 ),0);
                                 $idbarang = $tp30['id_barang'];
+                                $kdbarang = $tp30['kd_barang'];
                                 
                                 if( $tp30['t30']>0 && ($tp30['stok_barang']<=(0.25*$tp30['t30']))) {
                                     echo "
                                     <tr>
-                                        <td><input type='checkbox' name='check[]' value='$idbarang'> $no</td>";
+                                        <td><input type='checkbox' name='check[]' value='$kdbarang'> $no</td>";
                                     if ($tp30['t30'] <= "0") {
                                         echo " <td style='background-color:#ff003f;'align='center'><strong>MACET</strong></td> ";
                                     } elseif ($tp30['t30'] > 0 && $tp30['t30'] <= 5) {

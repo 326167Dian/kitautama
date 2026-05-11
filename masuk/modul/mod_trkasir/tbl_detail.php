@@ -127,8 +127,9 @@ color: white;
 												<button type='button' class='btn btn-primary right-block' onclick='simpan_transaksi();'>[F3] SIMPAN TRANSAKSI</button>
 												&nbsp
 												<input class='btn btn-danger' type='button' value=BATAL onclick=self.history.back()>
-											</div>";
-
+											</div>
+											";
+                                            
 											if($stt_aksi == "input_trkasir"){
 											}else{
 											echo"

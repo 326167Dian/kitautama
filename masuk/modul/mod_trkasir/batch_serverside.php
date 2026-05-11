@@ -38,11 +38,11 @@ if ($_GET['action'] == "table_data") {
         if($kd_barang != ''){
             $query = $db->prepare("SELECT batch.*, barang.nm_barang, SUM(batch.qty) as qty
                 FROM batch JOIN barang ON batch.kd_barang = barang.kd_barang 
-                WHERE batch.kd_barang = '$kd_barang' AND batch.status = 'masuk' GROUP BY batch.no_batch ORDER BY $order $dir LIMIT $limit OFFSET $start");
+                WHERE batch.kd_barang = '$kd_barang' AND batch.status = 'masuk' GROUP BY batch.no_batch ORDER BY batch.exp_date ASC LIMIT $limit OFFSET $start");
         } else {
             $query = $db->prepare("SELECT batch.*, barang.nm_barang, SUM(batch.qty) as qty
                 FROM batch JOIN barang ON batch.kd_barang = barang.kd_barang 
-                WHERE batch.status = 'masuk' GROUP BY batch.no_batch ORDER BY $order $dir LIMIT $limit OFFSET $start");
+                WHERE batch.status = 'masuk' GROUP BY batch.no_batch ORDER BY batch.exp_date ASC LIMIT $limit OFFSET $start");
             
         }
     } else {
@@ -54,7 +54,7 @@ if ($_GET['action'] == "table_data") {
                             OR batch.no_batch LIKE '%$search%'
                             OR batch.exp_date LIKE '%$search%'
                 GROUP BY batch.no_batch
-                ORDER BY $order $dir LIMIT $limit OFFSET $start");
+                ORDER BY batch.exp_date ASC LIMIT $limit OFFSET $start");
     
             $querycount = $db->prepare("SELECT count(id_batch) as jumlah 
                 FROM batch JOIN barang ON batch.kd_barang = barang.kd_barang 
@@ -122,6 +122,7 @@ if ($_GET['action'] == "table_data") {
                         data-nm_barang='$value[nm_barang]'
                         data-no_batch='$value[no_batch]'
                         data-exp_date='$value[exp_date]'
+                        data-qtybatch='$selisihQty'
                         >
                         <i class='fa fa-check'></i>
                         </button>";

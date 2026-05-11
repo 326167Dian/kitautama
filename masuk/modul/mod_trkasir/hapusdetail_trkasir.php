@@ -42,6 +42,17 @@ if ($getkode == 'BUND') {
             ':qty_dikembalikan' => ($rbundle['qty_barang'] * $qty_dtrkasir),
             ':kd_barang'        => $rbundle['kd_barang']
         ]);
+        
+        
+        $delete_batch = $db->prepare("DELETE FROM batch WHERE
+                                        kd_barang = :kd_barang  AND
+                                        kd_transaksi = :kd_transaksi AND
+                                        status = :status");
+        $delete_batch->execute([
+            ':kd_barang'    => $rbundle['kd_barang'],
+            ':kd_transaksi' => $kd_trbmasuk,
+            ':status'       => 'keluar'
+        ]);
     }
     
     // Ambil stok terbaru untuk ditampilkan

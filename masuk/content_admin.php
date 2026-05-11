@@ -551,6 +551,10 @@ elseif ($_GET['module'] == 'evaluasi') {
 elseif ($_GET['module'] == 'bundle') {
     include "modul/mod_bundle/bundle.php";
 }
+// Laporan Batch
+elseif ($_GET['module'] == 'lapbatch') {
+    include "modul/mod_batch/laporan_batch.php";
+}
 
 // $getkdon = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT kd_trkasir FROM kdtk WHERE id_admin = '$_SESSION[idadmin]' AND stt_kdtk ='ON' ORDER BY id_kdtk DESC");
 // $kdon = mysqli_fetch_array($getkdon);

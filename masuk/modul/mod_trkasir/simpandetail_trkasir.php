@@ -1,7 +1,11 @@
 <?php 
+ob_start();
 session_start();
 include "../../../configurasi/koneksi.php";
-header('Content-Type: application/json');
+include "../../../configurasi/fungsi_batch.php";
+
+ob_clean();
+header('Content-Type: application/json; charset=utf-8');
 
 try {
     $cekKolomResep = $db->prepare("SHOW COLUMNS FROM trkasir_detail LIKE 'resep'");
@@ -154,7 +158,25 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
             $stok_brg_lama = $mdl1['stok_barang'];
             $stok_brg_baru = $stok_brg_lama - $qty_dtrkasir;
             
-            $stmt_insert_trkasirdetail = $db->prepare("INSERT INTO trkasir_detail(kd_trkasir,
+            //proses input batch jika no batch kosong
+            $datetime = date('Y-m-d H:i:s', time());
+            if($no_batch != ""){
+                // Input batch
+                $stmt_insert_batch = $db->prepare("INSERT INTO batch(
+                                                    tgl_transaksi,
+                                                    no_batch,
+                                                    exp_date,
+                                                    qty,
+                                                    satuan,
+                                                    kd_transaksi,										
+            										kd_barang,
+            										status	
+            										)
+            								  VALUES(?,?,?,?,?,?,?,?)");    
+            	$stmt_insert_batch->execute([$datetime, $no_batch, $exp_date, $qty_dtrkasir, $sat_dtrkasir, $kd_trkasir, $kd_barang, 'keluar']);
+            	
+                // Input trkasir trkasir_detail
+                $stmt_insert_trkasirdetail = $db->prepare("INSERT INTO trkasir_detail(kd_trkasir,
         										id_barang,
         										kd_barang,
         										nmbrg_dtrkasir,
@@ -173,14 +195,21 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                                                 komisi,
                                                 idadmin)
     	    							  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-            $stmt_insert_trkasirdetail->execute([$kd_trkasir, $id_barang, $kd_barang, $nmbrg_dtrkasir, $qty_dtrkasir, $sat_dtrkasir, $hrgjual_dtrkasir, 
-                                    $disc, $resep, $modal, $profit, $no_batch, $exp_date, $datetime, $ttlharga, $tipe, $komisi, $id_admin]);
-        
-            $insertid_dtrkasir = $db->lastInsertId();
+                $stmt_insert_trkasirdetail->execute([$kd_trkasir, $id_barang, $kd_barang, $nmbrg_dtrkasir, $qty_dtrkasir, $sat_dtrkasir, $hrgjual_dtrkasir, 
+                                        $disc, $resep, $modal, $profit, $no_batch, $exp_date, $datetime, $ttlharga, $tipe, $komisi, $id_admin]);
             
-            if($no_batch != ""){
-                // Input batch
-                $stmt_insert_batch = $db->prepare("INSERT INTO batch(
+                $insertid_dtrkasir = $db->lastInsertId();
+            } else {
+                $data = get_batch_fifo($qty_dtrkasir, $kd_barang);
+                $data = json_decode($data, true); // ubah jadi object
+                
+                for ($i = 0; $i < count($data); $i++) {
+                    $no_batch = $data[$i]['no_batch'];
+                    $exp_date = $data[$i]['exp_date'];
+                    $qty_ambil = $data[$i]['qty_ambil'];
+                    
+                    // Input Batch    
+                    $stmt_insert_batch = $db->prepare("INSERT INTO batch(
                                                     tgl_transaksi,
                                                     no_batch,
                                                     exp_date,
@@ -191,7 +220,33 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
             										status	
             										)
             								  VALUES(?,?,?,?,?,?,?,?)");    
-            	$stmt_insert_batch->execute([$datetime, $no_batch, $exp_date, $qty_dtrkasir, $sat_dtrkasir, $kd_trkasir, $kd_barang, 'keluar']);
+            	    $stmt_insert_batch->execute([$datetime, $no_batch, $exp_date, $qty_ambil, $sat_dtrkasir, $kd_trkasir, $kd_barang, 'keluar']);
+            	    
+            	    // Input trkasir trkasir_detail
+            	    $ttlharga = $qty_ambil * $hrgdisc;
+                    $stmt_insert_trkasirdetail = $db->prepare("INSERT INTO trkasir_detail(kd_trkasir,
+            										id_barang,
+            										kd_barang,
+            										nmbrg_dtrkasir,
+            										qty_dtrkasir,
+            										sat_dtrkasir,
+            										hrgjual_dtrkasir,
+            										disc,
+                                                    resep,
+                                                    modal,
+            										profit,
+            										no_batch,
+            										exp_date,
+            										waktu,
+            										hrgttl_dtrkasir,
+            										tipe,
+                                                    komisi,
+                                                    idadmin)
+        	    							  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                    $stmt_insert_trkasirdetail->execute([$kd_trkasir, $id_barang, $kd_barang, $nmbrg_dtrkasir, $qty_ambil, $sat_dtrkasir, $hrgjual_dtrkasir, $disc, $resep, $modal, $profit, $no_batch, $exp_date, $datetime, $ttlharga, $tipe, $komisi, $id_admin]);
+                
+                    $insertid_dtrkasir = $db->lastInsertId();
+                }
             }
         
         										
@@ -262,10 +317,11 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                 }
                 
                 
-                
+                    
                 // Verifikasi update berhasil
                 if($stmt_updatebarang->rowCount() == 0) {
                     error_log("Warning: Stock update failed for id_barang: " . $id_barang);
+                    
                 }
                     
                 if($_SESSION['komisi']=='Y'){
@@ -293,10 +349,78 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
             $rowbundle = $bndl->rowCount();
             
             if ($rowbundle > 0) {
-                // $bundle = $bndl->fetch(PDO::FETCH_ASSOC);
-                // $stok_bundle_lama   = $bundle['qty_bundle'];
-                // $stok_bundle_baru   = $stok_bundle_lama - $qty_dtrkasir;
-                // $ttlharga = $qty_dtrkasir * $hrgdisc;
+                
+                // if($no_batch != ""){
+                //     // Input batch
+                //     $stmt_insert_batch = $db->prepare("INSERT INTO batch(
+                //                                         tgl_transaksi,
+                //                                         no_batch,
+                //                                         exp_date,
+                //                                         qty,
+                //                                         satuan,
+                //                                         kd_transaksi,										
+                // 										kd_barang,
+                // 										status	
+                // 										)
+                // 								  VALUES(?,?,?,?,?,?,?,?)");    
+                // 	$stmt_insert_batch->execute([$datetime, $no_batch, $exp_date, $qty_dtrkasir, $sat_dtrkasir, $kd_trkasir, $kd_barang, 'keluar']);
+                // } 
+                
+                
+                $get_bundle_detail = $db->prepare("SELECT * FROM bundle_detail
+                                                    WHERE kd_bundle = ?");
+                $get_bundle_detail->execute([$kd_barang]);
+                $datetime = date('Y-m-d H:i:s', time());
+                
+                while($rbundle = $get_bundle_detail->fetch(PDO::FETCH_ASSOC)){
+                    $qty_dikurangi = $rbundle['qty_barang'] * $qty_dtrkasir;
+                    
+                    $cekstokbarang = $db->prepare("SELECT stok_barang FROM barang WHERE kd_barang = :kd_barang");
+                    $cekstokbarang->execute([
+                        ':kd_barang'    => $rbundle['kd_barang']
+                    ]);
+                    $stokbarang = $cekstokbarang->fetch(PDO::FETCH_ASSOC);
+                    
+                    if($stokbarang['stok_barang'] < $qty_dikurangi){
+                        $data = array(
+                            "status"    => "error",
+                            "data"      => "Stok barang tidak mencukupi!"
+                        );
+                        echo json_encode($data);        
+                        die();
+                    }
+                    
+                    $update_stok_barang = $db->prepare("UPDATE barang SET stok_barang = stok_barang - :qty_dikurangi
+                                                        WHERE kd_barang = :kd_barang");
+                    $update_stok_barang->execute([
+                            ':qty_dikurangi' => $qty_dikurangi, 
+                            ':kd_barang' => $rbundle['kd_barang']
+                        ]);
+                    
+                    $data = get_batch_fifo($qty_dikurangi, $rbundle['kd_barang']);
+                    $data = json_decode($data, true); // ubah jadi object
+                    
+                    for ($i = 0; $i < count($data); $i++) {
+                        $no_batch = $data[$i]['no_batch'];
+                        $exp_date = $data[$i]['exp_date'];
+                        $qty_ambil = $data[$i]['qty_ambil'];
+                        
+                        // Input Batch    
+                        $stmt_insert_batch = $db->prepare("INSERT INTO batch(
+                                                        tgl_transaksi,
+                                                        no_batch,
+                                                        exp_date,
+                                                        qty,
+                                                        satuan,
+                                                        kd_transaksi,										
+                										kd_barang,
+                										status	
+                										)
+                								  VALUES(?,?,?,?,?,?,?,?)");    
+                	    $stmt_insert_batch->execute([$datetime, $no_batch, $exp_date, $qty_ambil, $rbundle['sat_barang'], $kd_trkasir, $rbundle['kd_barang'], 'keluar']);
+                	    
+                    }
+                }
                 
                 $bundle_detail  = $db->prepare("SELECT SUM(hrgjual_barang) as ttl_hrg_jual FROM bundle_detail WHERE kd_bundle = ?");
                 $bundle_detail->execute([$kd_barang]);
@@ -307,9 +431,9 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                 $barang->execute([$kd_barang]);
                 $brg_modal  = $barang->fetch(PDO::FETCH_ASSOC);
                 $min_stok   = $brg_modal['min_stok'];
-                $modal  = $brg_modal['ttl_hrg_modal'];
-                $profit = $bndl_jual['ttl_hrg_jual'] - $brg_modal['ttl_hrg_modal'];
-                //echo $min_stok; die();
+                $modal      = $brg_modal['ttl_hrg_modal'];
+                $profit     = $bndl_jual['ttl_hrg_jual'] - $brg_modal['ttl_hrg_modal'];
+                
                 if ($min_stok <= 0) {
                     // echo "<script type='text/javascript'>alert('Stok barang tidak mencukupi!');</script>";
                     $data = array(
@@ -343,21 +467,6 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                                     
                 
                 $insertid_dtrkasir = $db->lastInsertId();
-                if($no_batch != ""){
-                    // Input batch
-                    $stmt_insert_batch = $db->prepare("INSERT INTO batch(
-                                                        tgl_transaksi,
-                                                        no_batch,
-                                                        exp_date,
-                                                        qty,
-                                                        satuan,
-                                                        kd_transaksi,										
-                										kd_barang,
-                										status	
-                										)
-                								  VALUES(?,?,?,?,?,?,?,?)");    
-                	$stmt_insert_batch->execute([$datetime, $no_batch, $exp_date, $qty_dtrkasir, $sat_dtrkasir, $kd_trkasir, $kd_barang, 'keluar']);
-                }
                 
                 $update_stok_bundle = $db->prepare("UPDATE bundle SET qty_bundle = qty_bundle - :qty_dikurangi
                                                     WHERE id_bundle = :id_barang");
@@ -366,26 +475,7 @@ if($id_dtrkasir == "" || $id_dtrkasir == null){
                         ':id_barang'        => $id_barang
                     ]);
                 
-                $get_bundle_detail = $db->prepare("SELECT kd_barang, qty_barang FROM bundle_detail
-                                                    WHERE kd_bundle = ?");
-                $get_bundle_detail->execute([$kd_barang]);
-                while($rbundle = $get_bundle_detail->fetch(PDO::FETCH_ASSOC)){
-                    // $get_stok_barang = $db->prepare("SELECT stok_barang FROM barang
-                    //                                     WHERE kd_barang = ?");
-                    // $get_stok_barang->execute([$rbundle['kd_barang']]);
-                    // $rget = $get_stok_barang->fetch(PDO::FETCH_ASSOC);
-                    // $stok_barang_lama = $rget['stok_barang'];
-                    // $stok_barang_baru = $stok_barang_lama - ($rbundle['qty_barang'] * $qty_dtrkasir);
-                    
-                    
-                    $update_stok_barang = $db->prepare("UPDATE barang SET stok_barang = stok_barang - :qty_dikurangi
-                                                        WHERE kd_barang = :kd_barang");
-                    $update_stok_barang->execute([
-                            ':qty_dikurangi' => ($rbundle['qty_barang'] * $qty_dtrkasir), 
-                            ':kd_barang' => $rbundle['kd_barang']
-                        ]);
-                    
-                }
+                
             }
         }
         

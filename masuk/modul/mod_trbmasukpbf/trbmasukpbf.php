@@ -437,6 +437,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 echo "<script type='text/javascript'>window.location='?module=byrkredit&act=ubah&id=".$_GET['id']."'</script>";
             }
             
+            $stmt_header = $db->prepare("SELECT * FROM setheader");
+        	$stmt_header->execute();
+        	$rheader = $stmt_header->fetch(PDO::FETCH_ASSOC);
+        	
             // $disabled = ($re['sisa_bayar']==0)?'disabled':'';
             $disabled = ($re['sisa_bayar']==0)?'':'';
             echo "
@@ -457,6 +461,8 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							   <input type=hidden name='petugas' id='petugas' value='$petugas'>
 							   <input type=hidden name='kd_trbmasuk' id='kd_trbmasuk' value='$re[kd_trbmasuk]'>
 							   <input type=hidden name='kd_orders' id='kd_trbmasuk1' value='$re[kd_orders]'>
+							   <input type=hidden name='min_exp_date' id='min_exp_date' value='$rheader[empatbelas]'>
+							   
 						<div class='col-lg-6'>
 						
 							<div class='form-group'>
@@ -1806,6 +1812,10 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             }
             $tglharini = date('Y-m-d');
             
+            $stmt_header = $db->prepare("SELECT * FROM setheader");
+        	$stmt_header->execute();
+        	$rheader = $stmt_header->fetch(PDO::FETCH_ASSOC);
+        	
             echo "
 		  <div class='box box-primary box-solid'>
 				<div class='box-header with-border'>
@@ -1824,6 +1834,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							   <input type=hidden name='stt_aksi' id='stt_aksi' value='input_order_trbmasuk'>
 							   <input type=hidden name='id_supplier' id='id_supplier' value='$re[id_supplier]'>
 							   <input type=hidden name='petugas' id='petugas' value='$petugas'>
+							   <input type=hidden name='min_exp_date' id='min_exp_date' value='$rheader[empatbelas]'>
 							 
 						<div class='col-lg-6'>
 						
@@ -2593,9 +2604,24 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             var diskon              = document.getElementById('diskon').value;
             var no_batch            = document.getElementById('no_batch').value;
             var exp_date            = document.getElementById('exp_date').value;
+            var tgl_trbmasuk = document.getElementById('tgl_trbmasuk').value;
+            var min_exp_date = document.getElementById('min_exp_date').value;
+        
+            const tglAwal = new Date(tgl_trbmasuk);
+            const tglAkhir = new Date(exp_date);
+            const selisih = hitungSelisihBulan(tglAwal, tglAkhir);
+            
+            if(parseInt(selisih) < parseInt(min_exp_date)){
+                alert('Minimum Expired Date '+min_exp_date+' Hari dari Hari Ini!');
+                return false;
+            }
             
             if (nmbrg_dtrbmasuk == "") {
                 alert('Belum ada Item terpilih');
+            } else if (no_batch == "") {
+    			alert('No. Batch tidak boleh kosong');
+    		} else if (exp_date == "") {
+    			alert('Exp. date tidak boleh kosong');
             } else if (qty_dtrbmasuk == "") {
                 alert('Qty tidak boleh kosong');
             } else if (konversi == 0) {
@@ -2673,12 +2699,14 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         $(document).on('click', '#hapusorder', function () {
 
             var id_dtrbmasuk = $(this).data('id_dtrbmasuk');
+            var kd_orders = $('#kd_trbmasuk').val();
     
             $.ajax({
                 type: 'post',
                 url: "modul/mod_trbmasukpbf/hapusdetail_order.php",
                 data: {
-                    id_dtrbmasuk: id_dtrbmasuk
+                    id_dtrbmasuk: id_dtrbmasuk,
+                    kd_orders: kd_orders
                 },
     
                 success: function (data) {
@@ -2828,5 +2856,24 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     }
                 });
             }
+        }
+        
+        function hitungSelisihBulan(date1, date2) {
+            // let tahun1 = date1.getFullYear();
+            // let bulan1 = date1.getMonth();
+            // let hari1  = date1.getDate();
+            // let tahun2 = date2.getFullYear();
+            // let bulan2 = date2.getMonth();
+            // let hari2  = date2.getDate();
+        
+            // // return (tahun2 - tahun1) * 12 + (bulan2 - bulan1);
+            // return (hari2 - hari1);
+            
+            // Menghitung selisih milidetik
+            const selisihMilidetik = Math.abs(date2 - date1);
+            
+            // Konversi milidetik ke hari
+            const satuHari = 1000 * 60 * 60 * 24;
+            return Math.floor(selisihMilidetik / satuHari);
         }
     </script>

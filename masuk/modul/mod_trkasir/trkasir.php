@@ -567,6 +567,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 							   <input type=hidden name='petugas' id='petugas' value='$petugas'>
 							   <input type=hidden name='shift' id='shift' value='$shift'>
 							   <input type=hidden name='level' id='level' value='$_SESSION[level]'>
+							   <input type=hidden name='id_pelanggan' id='id_pelanggan'>
 							 
 							 
 						<div class='col-lg-6'>
@@ -610,17 +611,23 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 											</div>
 									<label class='col-sm-4 control-label'>Pelanggan</label>        		
 										<div class='col-sm-6'>
-											<input type=text name='nm_pelanggan' id='nm_pelanggan' class='typeahead form-control' autocomplete='off'>
+    										<div class='input-group'>
+        										<input type='text' name='nm_pelanggan' id='nm_pelanggan' class='typeahead form-control' autocomplete='off' readonly>
+        										<div class='input-group-addon'>
+        											<button type='button' data-toggle='modal' data-target='#ModalMember' href='#'><span class='glyphicon glyphicon-search'></span></button>
+        										</div>
+    										</div>	
 										</div>
+									
 										
 									<label class='col-sm-4 control-label'>Telepon</label>        		
 										<div class='col-sm-6'>
-											<input type=text name='tlp_pelanggan' id='tlp_pelanggan' class='form-control' autocomplete='off'>
+											<input type=text name='tlp_pelanggan' id='tlp_pelanggan' class='form-control' autocomplete='off' readonly>
 										</div>
 										
 									<label class='col-sm-4 control-label'>Alamat</label>        		
 										<div class='col-sm-6'>
-											<textarea name='alamat_pelanggan' id='alamat_pelanggan' class='form-control' rows='2'></textarea>
+											<textarea name='alamat_pelanggan' id='alamat_pelanggan' class='form-control' rows='2' readonly></textarea>
 										</div>
 										
 									<label class='col-sm-4 control-label'>Nama Dokter</label>        		
@@ -641,6 +648,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 								<input type=hidden name='id_admin' id='id_admin' value='$_SESSION[idadmin]'>
 								<input type=hidden name='komisi_dtrkasir' id='komisi_dtrkasir'>
 								<input type=hidden name='level' id='level' value='$_SESSION[level]'>
+								<input type='hidden' name='qty_batch' id='qty_batch'>
 								
 								<div class='form-group'>
 								
@@ -669,17 +677,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 									 </div>
 									 
 									<label class='col-sm-4 control-label'>Nama Barang</label>        		
-											<div class='col-sm-7'>
-    											<div class='btn-group btn-group-justified' role='group' aria-label='...'>
-                                                    <div class='btn-group' role='group'>
-    											        <input type=text name='nmbrg_dtrkasir' id='nmbrg_dtrkasir' class='typeahead form-control' autocomplete='off'>
-                                                        
-                                                    </div>
-                                                    <div class='btn-group' role='group'>
-                                                        <button type='button' class='btn btn-primary' id='nmbrg_dtrkasir_enter'>Enter</button>
-                                                    </div>
-                                                </div>
-    										</div>
+                                            <div class='col-sm-7'>
+                                                <input type=text name='nmbrg_dtrkasir' id='nmbrg_dtrkasir' class='typeahead form-control' autocomplete='off'>
+                                        </div>
     										
                                     <label class='col-sm-4 control-label'>Resep</label>        		
                                             <div class='col-sm-7'>
@@ -748,13 +748,31 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 								</div>
 								
 						</div>
+						
 						</form>
 							  
+        				<div class='col-lg-8' id='poin' style='display:none'>
+        				    <input type='checkbox' id='use_poin'> <label for='use_poin'>Gunakan Poin</label>
+            				<table class='table table-bordered'>
+            						    <thead>
+            						        <tr>
+                						        <td>Total Poin: <br><div id='total_poin_member'></div></td>
+                						        <td style='width: 40%'>Poin Digunakan: <br><input type='number' style='width:150px' id='input_poin' readonly></td>
+                						        <td>Sisa Poin: <br><div id='sisa_poin_member'></div></td>
+                						        <td style='text-align:center; width:10%'><button class='btn btn-success btn-lg' id='redeem_poin'>Redeem</button></td>
+                						    </tr>
+            						    </thead>
+            						</table>
+        				</div>
 				</div> 
+				
 				
 				<div id='tabeldata'>
 				
-			</div>";
+				
+			</div>
+			
+			";
             }
 
             break;
@@ -867,6 +885,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 								<input type=hidden name='id_admin' id='id_admin' value='$radmin[id_admin]'>
 								<input type=hidden name='komisi_dtrkasir' id='komisi_dtrkasir'>
 								<input type=hidden name='level' id='level' value='$_SESSION[level]'>
+								<input type='hidden' name='qty_batch' id='qty_batch'>
 								
 								<div class='form-group'>
 									
@@ -893,7 +912,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 									 
 									<label class='col-sm-4 control-label'>Nama Barang</label>        		
 											<div class='col-sm-7'>
-													<input type=text name='nmbrg_dtrkasir' id='nmbrg_dtrkasir' class='form-control' autocomplete='off'>
+                                                    <input type=text name='nmbrg_dtrkasir' id='nmbrg_dtrkasir' class='typeahead form-control' autocomplete='off'>
 											</div>
 									
 									<label class='col-sm-4 control-label'>Resep</label>        		
@@ -1211,7 +1230,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 									 
 									<label class='col-sm-4 control-label'>Nama Barang</label>        		
 											<div class='col-sm-7'>
-													<input type=text name='nmbrg_dtrkasir' id='nmbrg_dtrkasir' class='form-control' autocomplete='off'>
+                                                    <input type=text name='nmbrg_dtrkasir' id='nmbrg_dtrkasir' class='typeahead form-control' autocomplete='off'>
 											</div>
 									
                                     <label class='col-sm-4 control-label'>Resep</label>        		
@@ -1543,6 +1562,37 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 </div>
 <!-- end modal batch -->
 
+<!-- modal member -->
+<div id="ModalMember" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Data Member</h4>
+            </div>
+            <div class="modal-body table-responsive">
+                <table id="table_member" class="table table-condensed table-bordered table-striped table-hover" >
+		            <thead>
+						<tr class="judul-table">
+							<th style="vertical-align: middle; background-color: #008000; text-align: center; width:5%">No</th>
+							<th style="vertical-align: middle; background-color: #008000; text-align: left; ">Nama</th>
+							<th style="vertical-align: middle; background-color: #008000; text-align: left; ">Nomor Whatsapp</th>
+							<th style="vertical-align: middle; background-color: #008000; text-align: center; ">Pilih</th>
+                        </tr>
+					</thead>
+					<tbody>
+					
+					</tbody>
+				</table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end modal member -->
+
 <script type="text/javascript">
     $(function() {
         $(".datepicker").datepicker({
@@ -1551,6 +1601,39 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             todayHighlight: true,
         });
         
+    });
+    
+    $('#ModalMember').on('shown.bs.modal', function () {
+        $("#table_member").DataTable().destroy();
+        
+        $("#table_member").DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                "url": "modul/mod_trkasir/member-serverside.php?action=table_data",
+                "dataType": "JSON",
+                "type": "POST"
+            },
+            "rowCallback": function(row, data, index) {
+                
+            },
+            columns: [{
+                    "data": "no",
+                    "className": 'text-center',
+                },
+                {
+                    "data": "nm_pelanggan"
+                },
+                {
+                    "data": "tlp_pelanggan"
+                },
+                {
+                    "data": "pilih",
+                    "className": 'text-center'
+                },
+            ],
+            
+        })
     });
     
     $('#ModalItem').on('shown.bs.modal', function () {
@@ -1640,6 +1723,145 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 // console.log(row);
             }
         })
+    });
+    
+    $(document).on('click', '#caribatch', function() {
+	    let kd_barang = $('#kd_barang').val();
+	   // let kd_barang = document.getElementById('kd_barang').value;
+		$("#table_batch").DataTable().destroy();
+
+		$("#table_batch").DataTable({
+			processing: false,
+			serverSide: true,
+			ajax: {
+				"url": "modul/mod_trkasir/batch_serverside.php?action=table_data&id="+kd_barang,
+				"dataType": "JSON",
+				"type": "POST"
+			},
+			
+			columns: [{
+					"data": "no",
+					"className": 'text-center',
+				},
+				{
+					"data": "kd_barang"
+				},
+				{
+					"data": "nm_barang"
+				},
+				{
+					"data": "no_batch",
+					"className": 'text-center',
+				},
+				{
+					"data": "exp_date",
+					"className": 'text-center',
+				},
+				{
+					"data": "qty",
+					"className": 'text-center',
+				},
+				{
+					"data": "pilih",
+					"className": 'text-center'
+				},
+			],
+			
+		})
+
+	});
+	
+	$(document).on('click', '#pilihbatch', function(){
+        var id_batch    = $(this).data('id_batch');
+        var kd_barang   = $(this).data('kd_barang');
+	    var nm_barang   = $(this).data('nm_barang');
+	    var no_batch    = $(this).data('no_batch');
+	    var exp_date    = $(this).data('exp_date');
+	    var qty_batch   = $(this).data('qtybatch');
+	    
+	    document.getElementById('qty_batch').value = qty_batch;
+	    document.getElementById("batch").value = no_batch;
+	    document.getElementById("exp_date").value = exp_date;
+	    
+	    $(".close").click();
+    });
+	
+	$(document).on('click', '#pilihpelanggan', function(){
+        var id_pelanggan        = $(this).data('id_pelanggan');
+        var nm_pelanggan        = $(this).data('nm_pelanggan');
+        var tlp_pelanggan       = $(this).data('tlp_pelanggan');
+        var alamat_pelanggan    = $(this).data('alamat_pelanggan');
+        var ttl_pelanggan       = $(this).data('ttl_pelanggan');
+	    
+	    document.getElementById('id_pelanggan').value = id_pelanggan;
+	    document.getElementById('nm_pelanggan').value = nm_pelanggan;
+	    document.getElementById("tlp_pelanggan").value = tlp_pelanggan;
+	    document.getElementById("alamat_pelanggan").value = alamat_pelanggan;
+	    document.getElementById("input_poin").value = '0';
+	    
+	    document.getElementById('poin').style.display = 'block';
+	    
+	    $.ajax({
+            url: 'modul/mod_trkasir/getpoinmember.php',
+            type: 'post',
+            data: {
+                'id_pelanggan': id_pelanggan
+            },
+        }).success(function(data) {
+            document.getElementById('total_poin_member').innerHTML = data;
+            document.getElementById('sisa_poin_member').innerHTML = data;
+            
+        });
+        
+	    $(".close").click();
+    });
+    
+    $(document).on('click','#redeem_poin', function(e){
+        var id_pelanggan    = document.getElementById('id_pelanggan').value;
+        var input_poin      = document.getElementById('input_poin').value;
+        var ttl_trkasir     = document.getElementById('ttl_trkasir').value;
+        ttl_trkasir         = ttl_trkasir.replace(/\./g, '');
+        
+        if(parseInt(input_poin) == 0) {
+            tabel_detail();
+            return false;
+        } 
+        
+        $.ajax({
+            url: 'modul/mod_trkasir/getpoinmember.php',
+            type: 'post',
+            data: {
+                'id_pelanggan': id_pelanggan
+            },
+        }).success(function(data) {
+            document.getElementById('total_poin_member').innerHTML = data;
+            
+            if((parseInt(data) - input_poin) < 0){
+                alert('Poin anda tidak mencukupi!');
+                document.getElementById("input_poin").value = '0';
+                return false;
+            } else {
+                document.getElementById('sisa_poin_member').innerHTML = parseInt(data) - input_poin;
+            }
+            
+            if(parseInt(ttl_trkasir) > 0) {
+                document.getElementById('ttl_trkasir').value = formatRupiah(ttl_trkasir - input_poin);
+            }
+        });
+    });
+
+    $(document).on('change','#use_poin',function(e){
+        const use_poin = document.getElementById('use_poin');    
+        if (use_poin.checked) {
+            // console.log("The checkbox is checked!");
+            var input_poin = document.getElementById('input_poin');
+            input_poin.readOnly = false; 
+        } else {
+            // console.log("The checkbox is not checked.");
+            document.getElementById("input_poin").value = '0';
+            document.getElementById('input_poin').readOnly = true;
+            tabel_detail();
+        }
     });
     
     $(document).on('click','a[href="#profile"]',function(e){
@@ -1737,71 +1959,6 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
             return [];
         }
         return items.slice(0, AUTOCOMPLETE_LIMIT);
-    }
-
-    function initAutocompleteSafe(selector, endpoint, method) {
-        var $input = $(selector);
-        if (!$input.length || $input.data('ac-initialized')) {
-            return;
-        }
-
-        if ($.fn.typeahead) {
-            $input.typeahead({
-                source: function(query, process) {
-                    query = $.trim(query || '');
-                    if (query.length === 0) {
-                        return process([]);
-                    }
-
-                    var payload = {
-                        query: query
-                    };
-                    var handler = function(data) {
-                        return process(normalizeAutocompleteItems(data));
-                    };
-
-                    if (method === 'get') {
-                        return $.get(endpoint, payload, handler);
-                    }
-                    return $.post(endpoint, payload, handler);
-                }
-            });
-            $input.data('ac-initialized', true);
-            return;
-        }
-
-        if ($.ui && $.ui.autocomplete) {
-            $input.autocomplete({
-                minLength: 1,
-                source: function(request, response) {
-                    var term = $.trim(request.term || '');
-                    if (term.length === 0) {
-                        response([]);
-                        return;
-                    }
-
-                    var payload = {
-                        query: term
-                    };
-
-                    $.ajax({
-                        url: endpoint,
-                        type: method || 'post',
-                        data: payload,
-                        success: function(data) {
-                            response(normalizeAutocompleteItems(data));
-                        },
-                        error: function() {
-                            response([]);
-                        }
-                    });
-                }
-            });
-            $input.data('ac-initialized', true);
-            return;
-        }
-
-        console.warn('Plugin autocomplete/typeahead tidak ditemukan untuk', selector);
     }
 
     function closeAutocompleteSuggestions(selector) {
@@ -1997,11 +2154,13 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     }
 
     async function startBarcodeDetectorScanner() {
+
         if (!window.BarcodeDetector) {
-            setScannerStatus('Scanner tidak didukung browser ini. Coba Chrome Android terbaru.', true);
+            setScannerStatus('Browser tidak support BarcodeDetector.', true);
             return;
         }
-
+    
+        //var video = document.getElementById('barcodeScannerPreview');
         var video = document.getElementById('barcodeScannerPreview');
         var reader = document.getElementById('barcodeScannerReader');
         if (reader) {
@@ -2010,62 +2169,51 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         if (video) {
             video.style.display = 'block';
         }
-
-        try {
-            barcodeDetectorInstance = new BarcodeDetector({
-                formats: ['code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'codabar', 'qr_code']
-            });
-        } catch (e) {
-            setScannerStatus('Format barcode tidak didukung browser.', true);
-            return;
-        }
-
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            setScannerStatus('Kamera tidak tersedia di browser ini.', true);
-            return;
-        }
-
-        try {
-            scannerStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: {
-                        ideal: 'environment'
-                    }
-                },
-                audio: false
-            });
-
-            video.srcObject = scannerStream;
-            await video.play();
-            setScannerStatus('Arahkan kamera ke barcode item.', false);
-
-            scannerMode = 'barcode-detector';
-            scannerInterval = setInterval(async function() {
-                try {
-                    if (!video || video.readyState < 2 || !barcodeDetectorInstance) {
-                        return;
-                    }
-
-                    var detected = await barcodeDetectorInstance.detect(video);
-                    if (detected && detected.length > 0 && detected[0].rawValue) {
-                        if (barcodeScanLocked) {
-                            return;
-                        }
-
-                        barcodeScanLocked = true;
-                        var hasilScan = $.trim(detected[0].rawValue);
-                        setScannerStatus('Barcode terdeteksi: ' + hasilScan, false);
-                        $('#ModalScanBarcode').modal('hide');
-                        triggerBarangByKode(hasilScan);
-                    }
-                } catch (scanErr) {
-                    setScannerStatus('Gagal membaca barcode. Coba arahkan ulang kamera.', true);
+        barcodeDetectorInstance = new BarcodeDetector({
+            formats: ['code_128','ean_13','ean_8','qr_code']
+        });
+    
+        scannerStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { ideal: 'environment' },
+                width: { ideal: 720 },
+                height: { ideal: 1280 }
+            }
+        });
+    
+        video.srcObject = scannerStream;
+        await video.play();
+    
+        scannerInterval = setInterval(async function(){
+    
+            if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) {
+                return;
+            }
+    
+            try {
+    
+                const detected = await barcodeDetectorInstance.detect(video);
+    
+                if (detected.length > 0) {
+    
+                    const hasilScan = detected[0].rawValue;
+    
+                    barcodeScanLocked = true;
+                    clearInterval(scannerInterval);
+    
+                    setScannerStatus('Barcode: ' + hasilScan, false);
+    
+                    // $('#ModalScanBarcode').modal('hide');
+                    $('#ModalScanBarcode .close').click();
+                    triggerBarangByKode(hasilScan);
+    
                 }
-            }, 350);
-
-        } catch (err) {
-            setScannerStatus('Tidak bisa mengakses kamera. Pastikan izin kamera diaktifkan.', true);
-        }
+    
+            } catch(err) {
+                console.log("scan error", err);
+            }
+    
+        }, 600);
     }
 
     async function startBarcodeScanner() {
@@ -2173,8 +2321,96 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         }
     });
 
-    initAutocompleteSafe('#nmbrg_dtrkasir', 'modul/mod_trkasir/autonamabarang.php', 'post');
+    //initAutocompleteSafe('#nmbrg_dtrkasir', 'modul/mod_trkasir/autonamabarang.php', 'post');
 
+    // Autocomplete nama obat
+    $('#nmbrg_dtrkasir').typeahead({
+        source: function(query, process) {
+            return $.post('modul/mod_trkasir/autonamabarang.php', {
+                query: query
+            }, function(data) {
+
+                data = $.parseJSON(data);
+                return process(data);
+
+            });
+        },
+        updater: function(item) {
+            let jns_transaksi = $('select[name="jns_transaksi"]').val();
+
+            $.ajax({
+                url: 'modul/mod_trkasir/autonamabarang_enter.php',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    'nm_barang': item
+                },
+            }).done(function(data) {
+                let qty_default = "1";
+
+                for (let i = 0; i < data.length; i++) {
+                    data = data[i];
+
+                    if (jns_transaksi == '6') {
+                        document.getElementById('id_barang').value = data.id_barang;
+                        document.getElementById('kd_barang').value = data.kd_barang;
+                        document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
+                        document.getElementById('stok_barang').value = data.stok_barang;
+                        document.getElementById('qty_dtrkasir').value = qty_default;
+                        document.getElementById('sat_dtrkasir').value = data.sat_barang;
+                        document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang5;
+                    } else if (jns_transaksi == '5') {
+                        document.getElementById('id_barang').value = data.id_barang;
+                        document.getElementById('kd_barang').value = data.kd_barang;
+                        document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
+                        document.getElementById('stok_barang').value = data.stok_barang;
+                        document.getElementById('qty_dtrkasir').value = qty_default;
+                        document.getElementById('sat_dtrkasir').value = data.sat_barang;
+                        document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang4;
+                    } else if (jns_transaksi == '4') {
+                        document.getElementById('id_barang').value = data.id_barang;
+                        document.getElementById('kd_barang').value = data.kd_barang;
+                        document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
+                        document.getElementById('stok_barang').value = data.stok_barang;
+                        document.getElementById('qty_dtrkasir').value = qty_default;
+                        document.getElementById('sat_dtrkasir').value = data.sat_barang;
+                        document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang3;
+                    } else if (jns_transaksi == '3') {
+                        document.getElementById('id_barang').value = data.id_barang;
+                        document.getElementById('kd_barang').value = data.kd_barang;
+                        document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
+                        document.getElementById('stok_barang').value = data.stok_barang;
+                        document.getElementById('qty_dtrkasir').value = qty_default;
+                        document.getElementById('sat_dtrkasir').value = data.sat_barang;
+                        document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang2;
+                    } else if (jns_transaksi == '2') {
+                        document.getElementById('id_barang').value = data.id_barang;
+                        document.getElementById('kd_barang').value = data.kd_barang;
+                        document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
+                        document.getElementById('stok_barang').value = data.stok_barang;
+                        document.getElementById('qty_dtrkasir').value = qty_default;
+                        document.getElementById('sat_dtrkasir').value = data.sat_barang;
+                        document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang1;
+                    } else {
+                        document.getElementById('id_barang').value = data.id_barang;
+                        document.getElementById('kd_barang').value = data.kd_barang;
+                        document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
+                        document.getElementById('stok_barang').value = data.stok_barang;
+                        document.getElementById('qty_dtrkasir').value = qty_default;
+                        document.getElementById('sat_dtrkasir').value = data.sat_barang;
+                        document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang;
+                    }
+                }
+            }).fail(function(xhr) {
+                console.log('Gagal load data barang:', xhr.responseText);
+            }).always(function() {
+                closeAutocompleteSuggestions('#nmbrg_dtrkasir');
+            });
+
+            return item;
+        }
+    });
+    
     // event enter nama obat
     $(document).ready(function() {
         $('#nmbrg_dtrkasir').on('keydown', function(e) {
@@ -2191,7 +2427,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                         'nm_barang': nm_barang
                     },
                 }).done(function(data) {
-                    console.log(data);
+                    // console.log(data);
                     let qty_default = "1";
                     // console.log(data);
                     for (let i = 0; i < data.length; i++) {
@@ -2255,85 +2491,12 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 }).always(function() {
                     closeAutocompleteSuggestions('#nmbrg_dtrkasir');
                 });
+                
+                
+                
             }
         })
     });
-
-    $('#nmbrg_dtrkasir_enter').on('click', function() {
-        let nm_barang = $('#nmbrg_dtrkasir').val();
-        let jns_transaksi = $('select[name="jns_transaksi"]').val();
-
-        $.ajax({
-            url: 'modul/mod_trkasir/autonamabarang_enter.php',
-            type: 'post',
-            dataType: 'json',
-            data: {
-                'nm_barang': nm_barang
-            },
-        }).done(function(data) {
-            let qty_default = "1";
-
-            for (let i = 0; i < data.length; i++) {
-                data = data[i];
-
-                if (jns_transaksi == '6') {
-                    document.getElementById('id_barang').value = data.id_barang;
-                    document.getElementById('kd_barang').value = data.kd_barang;
-                    document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
-                    document.getElementById('stok_barang').value = data.stok_barang;
-                    document.getElementById('qty_dtrkasir').value = qty_default;
-                    document.getElementById('sat_dtrkasir').value = data.sat_barang;
-                    document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang5;
-                } else if (jns_transaksi == '5') {
-                    document.getElementById('id_barang').value = data.id_barang;
-                    document.getElementById('kd_barang').value = data.kd_barang;
-                    document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
-                    document.getElementById('stok_barang').value = data.stok_barang;
-                    document.getElementById('qty_dtrkasir').value = qty_default;
-                    document.getElementById('sat_dtrkasir').value = data.sat_barang;
-                    document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang4;
-                } else if (jns_transaksi == '4') {
-                    document.getElementById('id_barang').value = data.id_barang;
-                    document.getElementById('kd_barang').value = data.kd_barang;
-                    document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
-                    document.getElementById('stok_barang').value = data.stok_barang;
-                    document.getElementById('qty_dtrkasir').value = qty_default;
-                    document.getElementById('sat_dtrkasir').value = data.sat_barang;
-                    document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang3;
-                } else if (jns_transaksi == '3') {
-                    document.getElementById('id_barang').value = data.id_barang;
-                    document.getElementById('kd_barang').value = data.kd_barang;
-                    document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
-                    document.getElementById('stok_barang').value = data.stok_barang;
-                    document.getElementById('qty_dtrkasir').value = qty_default;
-                    document.getElementById('sat_dtrkasir').value = data.sat_barang;
-                    document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang2;
-                } else if (jns_transaksi == '2') {
-                    document.getElementById('id_barang').value = data.id_barang;
-                    document.getElementById('kd_barang').value = data.kd_barang;
-                    document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
-                    document.getElementById('stok_barang').value = data.stok_barang;
-                    document.getElementById('qty_dtrkasir').value = qty_default;
-                    document.getElementById('sat_dtrkasir').value = data.sat_barang;
-                    document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang1;
-                } else {
-                    document.getElementById('id_barang').value = data.id_barang;
-                    document.getElementById('kd_barang').value = data.kd_barang;
-                    document.getElementById('nmbrg_dtrkasir').value = data.nm_barang;
-                    document.getElementById('stok_barang').value = data.stok_barang;
-                    document.getElementById('qty_dtrkasir').value = qty_default;
-                    document.getElementById('sat_dtrkasir').value = data.sat_barang;
-                    document.getElementById('hrgjual_dtrkasir').value = data.hrgjual_barang;
-                }
-
-            }
-
-        }).fail(function(xhr) {
-            console.log('Gagal load data barang:', xhr.responseText);
-        }).always(function() {
-            closeAutocompleteSuggestions('#nmbrg_dtrkasir');
-        });
-    })
 
     // $(document).on('click', '#kode', function() {
         
@@ -2510,15 +2673,24 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         let id_admin = document.getElementById('id_admin').value;
         let level = document.getElementById('level').value;
         var jns_transaksi = $('select[name="jns_transaksi"]').val();
-
+        
+        if(no_batch != "") {
+            let qty_batch = document.getElementById('qty_batch').value;
+            
+            if( parseFloat(qty_dtrkasir) > parseFloat(qty_batch) ){
+                alert('Qty pada No.Batch '+no_batch+' tidak mencukupi!');
+                return false;
+            }
+        }
+        
         if (nmbrg_dtrkasir == "") {
             alert('Belum ada Item terpilih');
         } else if (qty_dtrkasir == "") {
             alert('Qty tidak boleh kosong');
         }
-        // else if (parseInt(stok_barang) < parseInt(qty_dtrkasir)) {
-        //     alert('Stok barang tidak mencukupi');
-        // }
+        else if (parseInt(stok_barang) < parseInt(qty_dtrkasir)) {
+            alert('Stok barang tidak mencukupi');
+        }
         else if (parseInt(disc || 0, 10) > 100) {
             alert('Input Diskon lebih kecil dari 100');
         }
@@ -2546,12 +2718,12 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     'resep': resep,
                     'komisi_dtrkasir': komisi_dtrkasir,
                     'id_admin': id_admin,
-                    'tipe': jns_transaksi,
+                    'tipe': jns_transaksi
                 },
                 success: function(result) {
                     if (result && result.status === 'error') {
                         alert(result.data);
-                        return;
+                        return false;
                     }
 
                     document.getElementById("id_barang").value = "";
@@ -2568,6 +2740,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
                     $('#nmbrg_dtrkasir').focus();
                     tabel_detail();
+                    // console.log(result);
                 },
                 error: function(xhr) {
                     var pesan = 'Gagal menyimpan detail transaksi.';
@@ -2703,7 +2876,16 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
         var diskon2x = diskon2.replace(/\./g, '');
         var dp_bayar1x = dp_bayar.replace(/\./g, '');
         var sisa_bayar1x = sisa_bayar.replace(/\./g, '');
-
+        
+        var id_pelanggan = document.getElementById('id_pelanggan').value;
+        var use_poin_check = document.getElementById('use_poin');
+        
+        if (use_poin_check.checked) {
+            var redeem_poin = document.getElementById('input_poin').value;
+        } else {
+            var redeem_poin = 0;
+        }
+        
         if (parseInt(dp_bayar1x || 0, 10) < parseInt(ttl_trkasir1x || 0, 10)) {
             alert('Input nominal bayar harus lebih besar atau sama dengan total harga');
         } else {
@@ -2731,7 +2913,9 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                     'sisa_bayar': sisa_bayar1x,
                     'ket_trkasir': ket_trkasir,
                     'stt_aksi': stt_aksi,
-                    'id_carabayar': id_carabayar
+                    'id_carabayar': id_carabayar,
+                    'id_pelanggan': id_pelanggan,
+                    'redeem_poin': redeem_poin
                 },
                 success: function(data) {
                     if (data && data.message == 'success') {
@@ -2768,64 +2952,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
     }
 
-    $(document).on('click', '#caribatch', function() {
-	    let kd_barang = $('#kd_barang').val();
-		$("#table_batch").DataTable().destroy();
-
-		$("#table_batch").DataTable({
-			processing: false,
-			serverSide: true,
-			ajax: {
-				"url": "modul/mod_trkasir/batch_serverside.php?action=table_data&id="+kd_barang,
-				"dataType": "JSON",
-				"type": "POST"
-			},
-			
-			columns: [{
-					"data": "no",
-					"className": 'text-center',
-				},
-				{
-					"data": "kd_barang"
-				},
-				{
-					"data": "nm_barang"
-				},
-				{
-					"data": "no_batch",
-					"className": 'text-center',
-				},
-				{
-					"data": "exp_date",
-					"className": 'text-center',
-				},
-				{
-					"data": "qty",
-					"className": 'text-center',
-				},
-				{
-					"data": "pilih",
-					"className": 'text-center'
-				},
-			],
-			
-		})
-
-	});
-	
-	$(document).on('click', '#pilihbatch', function(){
-        var id_batch    = $(this).data('id_batch');
-        var kd_barang   = $(this).data('kd_barang');
-	    var nm_barang   = $(this).data('nm_barang');
-	    var no_batch    = $(this).data('no_batch');
-	    var exp_date    = $(this).data('exp_date');
-	    
-	    document.getElementById("batch").value = no_batch;
-	    document.getElementById("exp_date").value = exp_date;
-	    
-	    $(".close").click();
-    });
-
+    
     function cetakstruk() {
 
         var kd_trkasir = document.getElementById('kd_trkasir').value;
@@ -2844,36 +2971,38 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 
     }
     
-    document.addEventListener('keydown', function(event) {
-        // console.log(event.key);
-        if (event.key === 'F1' || event.keyCode === 112) {
-            event.preventDefault(); // Mencegah help browser muncul
-            simpan_detail();
-        }
-    });
-	
-	document.addEventListener('keydown', function(event) {
-        if (event.key === 'F2' || event.keyCode === 113) {
-            event.preventDefault(); // Mencegah help browser muncul
-            $('#dp_bayar').focus();
-        }
-    });
-    
-    document.addEventListener('keydown', function(event) {
+    // F-Key shortcuts dengan priority tinggi
+    window.onkeydown = function(event) {
+        var keyCode = event.keyCode || event.which;
         
-        if (event.key === 'F3' || event.keyCode === 114) {
-            event.preventDefault(); // Mencegah help browser muncul
-            // simpan_detail();
+        if (keyCode === 112) { // F1
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+            simpan_detail();
+            return false;
+        }
+        else if (keyCode === 113) { // F2
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+            $('#dp_bayar').focus();
+            return false;
+        }
+        else if (keyCode === 114) { // F3
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
             simpan_transaksi();
+            return false;
         }
-    });
-    
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'F4' || event.keyCode === 115) {
-            event.preventDefault(); // Mencegah action default
-            // Shortcut untuk case "tambah"
+        else if (keyCode === 115) { // F4
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
             window.location = '?module=trkasir&act=tambah';
+            return false;
         }
-    });
+    };
 
 </script>

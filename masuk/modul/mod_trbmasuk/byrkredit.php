@@ -268,7 +268,11 @@ switch($_GET['act']){
         if ($re['jenis'] == "pbf") {
             echo "<script type='text/javascript'>window.location='?module=trbmasukpbf&act=ubah&id=".$_GET['id']."'</script>";
         }
-            
+        
+        $stmt_header = $db->prepare("SELECT * FROM setheader");
+        $stmt_header->execute();
+        $rheader = $stmt_header->fetch(PDO::FETCH_ASSOC);
+        	
         echo "
 		  <div class='box box-primary box-solid'>
 				<div class='box-header with-border'>
@@ -286,6 +290,7 @@ switch($_GET['act']){
 							   <input type=hidden name='stt_aksi' id='stt_aksi' value='ubah_trbmasuk'>
 							   <input type=hidden name='id_supplier' id='id_supplier' value='$re[id_supplier]'>
 							   <input type=hidden name='petugas' id='petugas' value='$petugas'>
+							   <input type=hidden name='min_exp_date' id='min_exp_date' value='$rheader[empatbelas]'>
 							 
 						<div class='col-lg-6'>
 						
@@ -795,7 +800,18 @@ switch($_GET['act']){
 		
 		var no_batch = document.getElementById('no_batch').value;
 		var exp_date = document.getElementById('exp_date').value;
-
+        var tgl_trbmasuk = document.getElementById('tgl_trbmasuk').value;
+		var min_exp_date = document.getElementById('min_exp_date').value;
+        
+        const tglAwal = new Date(tgl_trbmasuk);
+        const tglAkhir = new Date(exp_date);
+        const selisih = hitungSelisihBulan(tglAwal, tglAkhir);
+        
+        if(parseInt(selisih) < parseInt(min_exp_date)){
+            alert('Minimum Expired Date '+min_exp_date+' Hari dari Hari Ini!');
+            return false;
+        }
+        
 		if (nmbrg_dtrbmasuk == "") {
 			alert('Belum ada Item terpilih');
 		} else if (qty_dtrbmasuk == "") {
@@ -984,4 +1000,23 @@ switch($_GET['act']){
 			});
 		}
 	}
+	
+	function hitungSelisihBulan(date1, date2) {
+        // let tahun1 = date1.getFullYear();
+        // let bulan1 = date1.getMonth();
+        // let hari1  = date1.getDate();
+        // let tahun2 = date2.getFullYear();
+        // let bulan2 = date2.getMonth();
+        // let hari2  = date2.getDate();
+    
+        // // return (tahun2 - tahun1) * 12 + (bulan2 - bulan1);
+        // return (hari2 - hari1);
+        
+        // Menghitung selisih milidetik
+        const selisihMilidetik = Math.abs(date2 - date1);
+        
+        // Konversi milidetik ke hari
+        const satuHari = 1000 * 60 * 60 * 24;
+        return Math.floor(selisihMilidetik / satuHari);
+    }
 </script>

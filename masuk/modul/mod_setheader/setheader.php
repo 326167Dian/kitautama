@@ -92,6 +92,13 @@ switch($_GET['act']){
 							  </div>
 							  
 							  <div class='form-group'>
+									<label class='col-sm-3 control-label'>Minimum Exp. Date (Hari)</label>        		
+									 <div class='col-sm-6'>
+										<input type='number' name='empatbelas' class='form-control' value='$r[empatbelas]' autocomplete='off'>
+									 </div>
+							  </div>
+							  
+							  <div class='form-group'>
 									<label class='col-sm-3 control-label'>Logo Header</label>        		
 									 <div class='col-sm-6'>
 										<input type='file' name='fupload1' class='form-control' value='$r[logo]' autocomplete='off'>

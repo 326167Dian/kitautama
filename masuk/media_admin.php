@@ -332,6 +332,7 @@ if ($_SESSION['login'] == 0) {
 									<i class="glyphicon glyphicon-file"></i> <span>Laporan</span> <i class="fa fa-angle-left pull-right"></i>
 								</a>
 								<ul class="treeview-menu">
+								    <li><a href="?module=lapbatch" ><i class='glyphicon glyphicon-print'></i> Laporan Dekat Expired</a></li>
 									<?php if ($_SESSION['lpitem'] == "Y") { ?><li><a href="modul/mod_laporan/cetak_barang.php" target="_blank"><i class='glyphicon glyphicon-print'></i> Item Barang</a></li><?php } ?>
 									<?php if ($_SESSION['lpbrgmasuk'] == "Y") { ?><li><a href="?module=lapbrgmasuk"><i class='glyphicon glyphicon-print'></i> Barang Masuk</a></li><?php } ?>
 									<?php if ($_SESSION['lpkasir'] == "Y") { ?><li><a href="?module=lappenjualan"><i class='glyphicon glyphicon-print'></i> Penjualan</a></li><?php } ?>

@@ -189,6 +189,7 @@ $query1->execute([$kdorders]);
 
 
 
+
 while ($lihat = $query1->fetch(PDO::FETCH_ASSOC)) {
     $qty = ($lihat['qtygrosir_dtrbmasuk'] == "") ? $lihat['qty_dtrbmasuk'] : $lihat['qtygrosir_dtrbmasuk'];
     $satuan = ($lihat['satgrosir_dtrbmasuk'] == "") ? $lihat['sat_dtrbmasuk'] : $lihat['satgrosir_dtrbmasuk'];
@@ -213,35 +214,92 @@ while ($lihat = $query1->fetch(PDO::FETCH_ASSOC)) {
     $text15 = strlen($ket);
     
 
-    if($text6<47 || $text9<26) {
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->Cell(1, 0.7, $no, 1, 0, 'C');
-        $pdf->Cell(6.5, 0.7, $text4, 1, 0, 'L');
-        $pdf->Cell(4, 0.7, $text7, 1, 0, 'C');
-        $pdf->Cell(3, 0.7, $text10, 1, 0, 'C');
-        $pdf->Cell(1.5, 0.7, $satuan, 1, 0, 'C');
-        $pdf->Cell(1.4, 0.7, $qty, 1, 0, 'C');
-        $pdf->Cell(2.2, 0.7, $text13, 1, 1, 'C');
-    }
-    else {
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->Cell(1, 0.7, $no, 'LTR', 0, 'C');
-        $pdf->Cell(6.5, 0.7, $text4, 'LTR', 0, 'L');
-        $pdf->Cell(4, 0.7, $text7, 'LTR', 0, 'C');
-        $pdf->Cell(3, 0.7, $text10, 'LTR', 0, 'C');
-        $pdf->Cell(1.5, 0.7, $satuan, 'LTR', 0, 'C');
-        $pdf->Cell(1.4, 0.7, $qty, 'LTR', 0, 'C');
-        $pdf->Cell(2.2, 0.7, $text13, 'LTR', 1, 'C');
+    // if($text6<47 || $text9<26) {
+    //     $pdf->SetFont('Arial', '', 8);
+    //     $pdf->Cell(1, 0.7, $no, 1, 0, 'C');
+    //     $pdf->Cell(6.5, 0.7, $text4, 1, 0, 'L');
+    //     $pdf->Cell(4, 0.7, $text7, 1, 0, 'C');
+    //     $pdf->Cell(3, 0.7, $text10, 1, 0, 'C');
+    //     $pdf->Cell(1.5, 0.7, $satuan, 1, 0, 'C');
+    //     $pdf->Cell(1.4, 0.7, $qty, 1, 0, 'C');
+    //     $pdf->Cell(2.2, 0.7, $text13, 1, 1, 'C');
+    // }
+    // else {
+    //     $pdf->SetFont('Arial', '', 8);
+    //     $pdf->Cell(1, 0.7, $no, 'LTR', 0, 'C');
+    //     $pdf->Cell(6.5, 0.7, $text4, 'LTR', 0, 'L');
+    //     $pdf->Cell(4, 0.7, $text7, 'LTR', 0, 'C');
+    //     $pdf->Cell(3, 0.7, $text10, 'LTR', 0, 'C');
+    //     $pdf->Cell(1.5, 0.7, $satuan, 'LTR', 0, 'C');
+    //     $pdf->Cell(1.4, 0.7, $qty, 'LTR', 0, 'C');
+    //     $pdf->Cell(2.2, 0.7, $text13, 'LTR', 1, 'C');
 
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->Cell(1, 0.5,'', 'LBR', 0, 'C');
-        $pdf->Cell(6.5, 0.5, $text5, 'LBR', 0, 'L');
-        $pdf->Cell(4, 0.5, $text8, 'LBR', 0, 'C');
-        $pdf->Cell(3, 0.5, $text11, 'LBR', 0, 'C');
-        $pdf->Cell(1.5, 0.5, '', 'LBR', 0, 'C');
-        $pdf->Cell(1.4, 0.5, '', 'LBR', 0, 'C');
-        $pdf->Cell(2.2, 0.5, $text14, 'LBR', 1, 'C');
+    //     $pdf->SetFont('Arial', '', 8);
+    //     $pdf->Cell(1, 0.5,'', 'LBR', 0, 'C');
+    //     $pdf->Cell(6.5, 0.5, $text5, 'LBR', 0, 'L');
+    //     $pdf->Cell(4, 0.5, $text8, 'LBR', 0, 'C');
+    //     $pdf->Cell(3, 0.5, $text11, 'LBR', 0, 'C');
+    //     $pdf->Cell(1.5, 0.5, '', 'LBR', 0, 'C');
+    //     $pdf->Cell(1.4, 0.5, '', 'LBR', 0, 'C');
+    //     $pdf->Cell(2.2, 0.5, $text14, 'LBR', 1, 'C');
+    // }
+    
+    $pdf->SetFont('Arial', '', 8);
+    
+    $current_x = $pdf->GetX();
+    $current_y = $pdf->GetY();
+    
+    if($text6 > 46){
+        $panjangbarang = ceil($text6 / 46);
+        $row_height  = ( 0.7 * $panjangbarang);
+        $row_barang = 0.7;
+    } elseif($text9 > 24) {
+        $panjangket = ceil($text9 / 24);
+        $row_height = ( 0.7 * $panjangket);
+        $row_ket = 0.7;
+    } elseif($text12 > 22){
+        $panjangdosis = ceil($text12 / 22);
+        $row_height = ( 0.7 * $panjangdosis);
+        $row_dosis = 0.7;
+    } elseif($text15 > 9){
+        $panjangqty = ceil($text15 / 9);
+        $row_height = ( 0.7 * $panjangqty);
+        $row_qty = 0.7;
+    } else {
+        $row_height = 0.7;
     }
+    
+    $row_barang = ($row_barang > 0)? $row_barang : $row_height;
+    $row_ket = ($row_ket > 0)? $row_ket : $row_height;
+    $row_dosis = ($row_dosis > 0)? $row_dosis : $row_height;
+    $row_qty = ($row_qty > 0)? $row_qty : $row_height;
+    
+    // 1. Kolom Nomorg
+    $pdf->Cell(1, $row_height, $no, 1, 0, 'C');
+    
+    // 2. Kolom Nama Barang (MultiCell)
+    $pdf->MultiCell(6.5, $row_barang, $text4.$text5, 1, 'L');
+    
+    // 3. Kolom Zat aktif (Kembali ke atas samping MultiCell)
+    $pdf->SetXY($current_x + 1 + 6.5, $current_y);
+    $pdf->MultiCell(4, $row_ket, $text7.$text8, 1, 'C');
+    
+    // 3. Kolom Dosis (Kembali ke atas samping MultiCell)
+    $pdf->SetXY($current_x + 1 + 6.5 + 4, $current_y);
+    $pdf->MultiCell(3, $row_dosis, $text10.$text11, 1, 'C');
+
+    // 4. Kolom Satuan
+    $pdf->SetXY($current_x + 1 + 6.5 + 4 + 3, $current_y);
+    $pdf->Cell(1.5, $row_height, $satuan, 1, 0, 'C');
+    
+    // 5. Kolom Qty
+    $pdf->SetXY($current_x + 1 + 6.5 + 4 + 3 + 1.5, $current_y);
+    $pdf->Cell(1.4, $row_height, $qty, 1, 0, 'C');
+    
+    // 6. Kolom Ket Qty
+    $pdf->SetXY($current_x + 1 + 6.5 + 4 + 3 + 1.5 + 1.4, $current_y);
+    $pdf->MultiCell(2.2, $row_qty, $text13.$text14, 1, 'C');
+    
     $no++;
 }
 

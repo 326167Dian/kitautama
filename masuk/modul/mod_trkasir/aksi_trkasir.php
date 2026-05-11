@@ -21,7 +21,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	} else {
 		$act = $_GET['act'];
 	}
-
+    
 	// Input admin
 	if ($module == 'trkasir' and $act == 'input_trkasir') {
         header('Content-Type: application/json');
@@ -36,12 +36,47 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
                 $data['error'] = 'Detail transaksi masih kosong.';
 			    echo json_encode($data);
             } else {
+                
+                $stmt_trkasir = $db->prepare("SELECT SUM(hrgttl_dtrkasir) AS total_harga FROM trkasir_detail
+                                            WHERE kd_trkasir = :kd_trkasir");
+                $stmt_trkasir->execute([
+                    ':kd_trkasir'   => $_POST['kd_trkasir']
+                ]);
+                $tk = $stmt_trkasir->fetch(PDO::FETCH_ASSOC);
+                                                
+                $stmt_poin = $db->prepare("SELECT * FROM poin_pelanggan");
+                $stmt_poin->execute();
+                $poin = $stmt_poin->fetch(PDO::FETCH_ASSOC);
+                        
+                $stmt_pelanggan = $db->prepare("SELECT * FROM pelanggan WHERE id_pelanggan = :id_pelanggan");
+                $stmt_pelanggan->execute([
+                    ':id_pelanggan' => $_POST['id_pelanggan']
+                ]);
+                
+                $total_poin = 0;
+                $poin_awal = 0;
+                if($stmt_pelanggan->rowCount() > 0){
+                    $pelanggan = $stmt_pelanggan->fetch(PDO::FETCH_ASSOC);
+                    $poin_awal = $pelanggan['total_poin'];
+                    $total_poin = floor($tk['total_harga'] / $poin['min_penjualan']) * $poin['poin_pelanggan'];
+                            
+                    $stmt_update_pelanggan = $db->prepare("UPDATE pelanggan SET total_poin = (total_poin + :total_poin) - :redeem_poin
+                                                            WHERE id_pelanggan = :id_pelanggan");
+                    $stmt_update_pelanggan->execute([
+                        ':total_poin'   => $total_poin,
+                        ':redeem_poin'    => $_POST['redeem_poin'],
+                        ':id_pelanggan' => $_POST['id_pelanggan']
+                    ]);
+                    
+                }
+                
     		    $inserttrkasir = $db->prepare("INSERT INTO trkasir(
     										kd_trkasir,	
 											id_user,
     										petugas,
     										shift,																				
-    										tgl_trkasir,																	
+    										tgl_trkasir,	
+    										id_pelanggan,
     										nm_pelanggan,										
     										tlp_pelanggan,
     										alamat_pelanggan,
@@ -54,15 +89,20 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
     										ket_trkasir,
     										id_carabayar,
 											jenistx,
-											waktu_trx
+											waktu_trx,
+											poin_awal,
+											tambahan_poin,
+											redeem_poin
     										)
-    									 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    		        $insert = $inserttrkasir->execute([$_POST['kd_trkasir'], $_POST['id_user'], $_POST['petugas'], $_POST['shift'], $_POST['tgl_trkasir'], $_POST['nm_pelanggan'], $_POST['tlp_pelanggan'], $_POST['alamat_pelanggan'], $_POST['kodetx'], $_POST['ttl_trkasir'], $_POST['diskon1'], $_POST['diskon2'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trkasir'], $_POST['id_carabayar'], $jnstx['tipe'], $datetime]);
+    									 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    		        $insert = $inserttrkasir->execute([$_POST['kd_trkasir'], $_POST['id_user'], $_POST['petugas'], $_POST['shift'], $_POST['tgl_trkasir'], $_POST['id_pelanggan'], $_POST['nm_pelanggan'], $_POST['tlp_pelanggan'], $_POST['alamat_pelanggan'], $_POST['kodetx'], $_POST['ttl_trkasir'], $_POST['diskon1'], $_POST['diskon2'], $_POST['dp_bayar'], $_POST['sisa_bayar'], $_POST['ket_trkasir'], $_POST['id_carabayar'], $jnstx['tipe'], $datetime, $poin_awal, $total_poin, $_POST['redeem_poin']]);
 
                 $db->prepare("update trkasir_detail set idadmin = ? where kd_trkasir = ?")->execute([$_POST['id_user'], $_POST['kd_trkasir']]);
     
             $tgl_sekarang = date('Y-m-d H:i:s', time());
             $db->prepare("INSERT INTO kartu_stok(kode_transaksi, tgl_sekarang) VALUES(?,?)")->execute([$_POST['kd_trkasir'], $tgl_sekarang]);
+            
+                
     		if ($insert) {
     			# code...
     			$db->prepare("UPDATE kdtk SET stt_kdtk = 'OFF' WHERE id_admin = ? AND kd_trkasir = ?")->execute([$_SESSION['idadmin'], $_POST['kd_trkasir']]);
@@ -258,7 +298,13 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 	
 			}
 
-
+            $stmt_update_poin = $db->prepare("UPDATE pelanggan SET total_poin = (total_poin - :tambahan_poin) + :redeem_poin WHERE id_pelanggan = :id_pelanggan");
+            $stmt_update_poin->execute([
+                ':tambahan_poin'    => $r1['tambahan_poin'],
+                ':redeem_poin'      => $r1['redeem_poin'],
+                ':id_pelanggan'     => $r1['id_pelanggan']
+            ]);
+            
 			$stmt_del_trkasir = $db->prepare("DELETE FROM trkasir WHERE id_trkasir = ?");
 			$stmt_del_trkasir->execute([$_GET['id']]);
             $stmt_del_karstok = $db->prepare("DELETE FROM kartu_stok WHERE kode_transaksi = ?");

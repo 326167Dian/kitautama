@@ -1,4 +1,5 @@
 <?php
+Date_Default_timezone_set('Asia/jakarta');
 
 // Load helper koneksi rahasia dari folder yang sama.
 $hiddenConnectionFiles = array('.terhubung.php', '.terhubung');

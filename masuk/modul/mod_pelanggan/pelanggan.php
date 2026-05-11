@@ -54,6 +54,7 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 					<a class='btn btn-info btn-flat' href='?module=homecare' target='_blank'>HOME CARE </a>
 					<a class='btn btn-info btn-flat' href='?module=swamedikasi' target='_blank'>SWAMEDIKASI </a>
 					<a class='btn btn-info btn-flat' href='?module=cekdarah' target='_blank'>CEK DARAH</a>
+					<a class='btn btn-info btn-flat' data-toggle='modal' data-target='#ModalPoin' href='#'>POIN MEMBER</a>
 					<br><br>
 
 
@@ -636,6 +637,80 @@ if (empty($_SESSION['username']) and empty($_SESSION['passuser'])) {
 </div>
 <!-- end modal item -->
 
+<!-- modal poin -->
+<div id="ModalPoin" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Input Ketentuan Poin</h4>
+            </div>
+            <div class="modal-body ">
+                <?php
+                    $stmt = $db->prepare("SELECT * FROM setheader");
+                	$stmt->execute();
+                	$r = $stmt->fetch(PDO::FETCH_ASSOC);
+                	
+                	$stmt_poin = $db->prepare("SELECT * FROM poin_pelanggan");
+                	$stmt_poin->execute();
+                	$rp = $stmt_poin->fetch(PDO::FETCH_ASSOC);
+                	
+                	$nm_outlet      = ($rp)? $rp['nm_outlet'] : $r['satu'];
+                	$is_outlet      = ($rp)? (($rp['is_outlet']=='ya')?'checked':''):'';
+                	$is_kelipatan   = ($rp)? (($rp['is_kelipatan']=='ya')?'checked':''):'';
+                	$min_penjualan  = ($rp)? $rp['min_penjualan']:'';
+                	$poin_pelanggan  = ($rp)? $rp['poin_pelanggan']:'';
+                ?>
+                <form method="POST" action="<?=$aksi?>?module=pelanggan&act=input_poin">
+                    <div class="form-group">
+                        <label for="nm_outlet">Nama Outlet</label>
+                        <input type="text" class="form-control" name="nm_outlet" id="nm_outlet" placeholder="Nama Outlet" value="<?=$nm_outlet?>">
+                     </div>
+  
+                    <div class="checkbox">
+                        <label>
+                          <input type="checkbox" name="is_outlet" id="is_outlet" <?=$is_outlet?>> Gunakan Nama Outlet Pada Kartu Member
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="min_penjualan">Minimal Penjualan</label>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-addon">Rp</div>
+                                <input type="number" class="form-control" id="min_penjualan" name="min_penjualan" placeholder="Amount" value="<?=$min_penjualan?>">
+                                <div class="input-group-addon">.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox">
+                        <label>
+                          <input type="checkbox" name="is_kelipatan" id="is_kelipatan" <?=$is_kelipatan?>> Berlaku kelipatan
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="poin_member">Poin yang diberikan</label>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="poin_member" name="poin_member" placeholder="Amount" value="<?=$poin_pelanggan?>">
+                                <div class="input-group-addon">Poin</div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-success">Submit</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+                </form>
+            </div>
+            <!--<div class="modal-footer">-->
+            <!--    <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>-->
+            <!--</div>-->
+        </div>
+    </div>
+</div>
+<!-- end modal poin -->
 
 <script>
     /* =========================
